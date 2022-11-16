@@ -26,13 +26,17 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self)  # явный вызов конструктора родительского класса
         # при наследовании всегда нужно вызывать конструктор родительского класса
+        self.button_is_checked = True  # переменная для хранения состояния кнопки, True - кнопка нажата
         self.setWindowTitle('My App')  # установка названия главного окна приложения
         self.button = QPushButton('Press Me!')  # создание кнопки
-        self.button.setFixedSize(QSize(100, 50))  # можно задать размер кнопки
+        self.button.setFixedSize(QSize(200, 50))  # можно задать размер кнопки
         self.button.setCheckable(True)  # указывает на то, может ли кнопка выполнять функцию переключателя,
         # Т.е. при каждом нажатии попеременно менять статус нажата/отжата
         self.button.clicked.connect(self.the_button_was_clicked)  # привязка метода (слота) получателя сигнала к кнопке
         self.button.clicked.connect(self.the_button_was_toggled)  # привязка метода (слота) получателя сигнала к кнопке
+        self.button.released.connect(self.the_button_was_released)  # привязка метода (слота) получателя сигнала к
+        # кнопке на событие отжатия кнопки. Сигнал release не посылает событие в привязанный метод!!!
+        self.button.setChecked(self.button_is_checked)  # установка кнопки в сохраненное состояние
         self.setFixedSize(QSize(400, 300))  # установка ФИКСИРОВАННОГО размера главного окна приложения
         # если установить минимальный и максимальный размер окна, то setFixedSize() будет указывать
         # на стартовые размеры окна
@@ -40,21 +44,29 @@ class MainWindow(QMainWindow):
         self.setMaximumSize(QSize(1000, 1000))  # установка максимального размера окна
         self.setCentralWidget(self.button)  # метод QMainWindow для размещения кнопки в главно окне приложения
 
-    @staticmethod
-    def the_button_was_clicked() -> None:
+    def the_button_was_clicked(self) -> None:
         """
         Метод получателя сигнала - слот.
         :return: None
         """
         print('Clicked')
 
-    @staticmethod
-    def the_button_was_toggled(checked: bool) -> None:
+    def the_button_was_toggled(self, checked: bool) -> None:
         """
         Метод получателя сигнала - слот.
         :return: None
         """
-        print('Checked?', checked)
+        self.button_is_checked = checked  # передача состояния кнопки в переменную для его хранения
+        print('Checked?', self.button_is_checked)
+
+    def the_button_was_released(self) -> None:
+        """
+        Метода получателя сигнала - слот, на отжатие кнопки.
+        :return: None
+        """
+        self.button_is_checked = self.button.isChecked()  # передача состояния кнопки в переменную для его хранения
+        # через метод виджета кнопки, т.к. сигнал release не передает событие в вызываемый метод
+        print('Release method', self.button_is_checked)
 
 
 def main() -> None:
