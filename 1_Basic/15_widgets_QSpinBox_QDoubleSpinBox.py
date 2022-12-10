@@ -1,4 +1,4 @@
-#!/use/bin/env python3
+#!/usr/bin/env python3
 import sys
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow, QSpinBox, QDoubleSpinBox
@@ -33,6 +33,8 @@ class MainWindow(QMainWindow):
         self.widget.setMinimum(-10)  # установка минимального значения спинбокса
         self.widget.setMaximum(3)  # установка максимального значения спинбокса
         self.widget2.setRange(-10, 10)  # можно установить сразу диапазон значений спинбокса
+        # стартовое значение по умолчанию равно 0
+        self.widget.setValue(-6)  # стартовое значение можно задать так
         self.widget.setPrefix('$')  # установка значка, который будет показываться перед числом
         self.widget.setSuffix('c')  # установка значка, который будет показываться после числа
         self.widget2.setPrefix('N=')  # установка значка, который будет показываться перед числом
