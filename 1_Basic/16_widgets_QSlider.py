@@ -10,7 +10,6 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 Qt - содержит различные идентификаторы, используемые в библиотеке Qt
 Импорт из модуля QtWidgets PySide6 класса для управления приложением QApplication и
 класса основного окна QMainWindow, класса виджета слайдера QSlider 
-QSpinBox, QDoubleSpinBox.
 Дополнительно импортируем класс слоев для размещения виджетов QVBoxLayout и базовый класс виджета QWidget.
 Другие виджеты можно найти по ссылке https://doc.qt.io/qt-5/widget-classes.html#basic-widget-classes
 """
@@ -42,8 +41,8 @@ class MainWindow(QMainWindow):
         # если поставить дробный шаг, то слайдером можно будет управлять только курсором мыши
         self.widget1.valueChanged.connect(self.value_changed)  # создание сигнала изменения значения,
         # передается число методу ресиверу
-        self.widget1.sliderMoved.connect(self.slider_position)  # создание сигнала измненения положения слайдера,
-        # методу ресиверу передается положение слайдера. данный сигнал передается только если управление
+        self.widget1.sliderMoved.connect(self.slider_position)  # создание сигнала изменения положения слайдера,
+        # методу ресиверу передается положение слайдера. Данный сигнал передается только если управление
         # слайдером производится курсором мышки
         self.widget1.sliderPressed.connect(self.slider_pressed)  # создается сигнал о нажатии на слайдер
         self.widget1.sliderReleased.connect(self.slider_released)  # создается сигнал об отпуске слайдера
@@ -63,6 +62,7 @@ class MainWindow(QMainWindow):
         """
         Метод ресивер (слот) для получения сигнала от виджета
         :param i: int значение слайдера
+        :return: None
         """
         print(i)
 
@@ -70,6 +70,8 @@ class MainWindow(QMainWindow):
     def slider_position(p: int) -> None:
         """
         Метод ресивер (слот) для получения сигнала от виджета о положении слайдера
+        :param p: int значение слайдера
+        :return: None
         """
         print(f'position {p}')
 
