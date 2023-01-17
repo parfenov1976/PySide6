@@ -28,20 +28,24 @@ class MainWindow(QMainWindow):
         Конструктор главного окна приложения
         """
         QMainWindow.__init__(self)  # явный вызов конструктора родительского класса
-        self.setWindowTitle('Mouse evnet app')
-        self.label = QLabel('Click on this window!')
-        self.setMouseTracking(True)
-        self.setCentralWidget(self.label)
+        self.setWindowTitle('Mouse evnet app')  # присваивает имя главному окну приложения
+        self.label = QLabel('Click on this window!')  # создает виджет ярлыка с надписью
+        self.setMouseTracking(True)  # устанавливаем флаг для отслеживания движения мыши даже когда не зажата кнопка
+        self.setCentralWidget(self.label)  # размещаем виджет ярлыка в главном окне приложения
 
     def mouseMoveEvent(self, event: QWidget.mouseMoveEvent) -> None:
         """
-        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        Метод обработчик событий PySide6.QtGui.QMouseEvent, отрабатывающий перемещения мыши
+        :param: event - событие специального обработчика событий мыши
+        :return: None
         """
-        self.label.setText('mouseMoveEvent')
+        self.label.setText('mouseMoveEvent')  # заменяем текст в ярлыке при вызове обработчика
 
     def mousePressEvent(self, event: QWidget.mouseMoveEvent) -> None:
         """
-        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        Метод обработчик событий PySide6.QtGui.QMouseEvent, отрабатывающий нажатие кнопки мыши
+        :param: event - событие специального обработчика событий мыши
+        :return: None
         """
         print(event)
         if event.button() == Qt.LeftButton:
@@ -57,7 +61,9 @@ class MainWindow(QMainWindow):
 
     def mouseReleaseEvent(self, event: QWidget.mouseMoveEvent) -> None:
         """
-        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        Метод обработчик событий PySide6.QtGui.QMouseEvent, отрабатывающий отпускание кнопки мыши
+        :param: event - событие специального обработчика событий мыши
+        :return: None
         """
         if event.button() == Qt.LeftButton:
             self.label.setText('mouseReleaseEvent LEFT')
@@ -72,7 +78,9 @@ class MainWindow(QMainWindow):
 
     def mouseDoubleClickEvent(self, event: QWidget.mouseMoveEvent) -> None:
         """
-        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        Метод обработчик событий PySide6.QtGui.QMouseEvent, отрабатывающий двойное нажатие кнопки мыши
+        :param: event - событие специального обработчика событий мыши
+        :return: None
         """
         if event.button() == Qt.LeftButton:
             self.label.setText('mouseDoubleClickEvent LEFT')
