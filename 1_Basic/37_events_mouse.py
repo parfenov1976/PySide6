@@ -34,17 +34,56 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.label)
 
     def mouseMoveEvent(self, event: QWidget.mouseMoveEvent) -> None:
+        """
+        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        """
         self.label.setText('mouseMoveEvent')
 
     def mousePressEvent(self, event: QWidget.mouseMoveEvent) -> None:
+        """
+        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        """
         print(event)
-        self.label.setText('mousePressEvent')
+        if event.button() == Qt.LeftButton:
+            self.label.setText('mousePressEvent LEFT')
+        elif event.button() == Qt.MiddleButton:
+            self.label.setText('mousePressEvent MIDDLE')
+        elif event.button() == Qt.RightButton:
+            self.label.setText('mousePressEvent RIGHT')
+        elif event.button() == Qt.BackButton:
+            self.label.setText('mousePressEvent BACK')
+        elif event.button() == Qt.ForwardButton:
+            self.label.setText('mousePressEvent FORWARD')
 
     def mouseReleaseEvent(self, event: QWidget.mouseMoveEvent) -> None:
-        self.label.setText('mouseReleaseEvent')
+        """
+        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        """
+        if event.button() == Qt.LeftButton:
+            self.label.setText('mouseReleaseEvent LEFT')
+        elif event.button() == Qt.MiddleButton:
+            self.label.setText('mouseReleaseEvent MIDDLE')
+        elif event.button() == Qt.RightButton:
+            self.label.setText('mouseReleaseEvent RIGHT')
+        elif event.button() == Qt.BackButton:
+            self.label.setText('mouseReleaseEvent BACK')
+        elif event.button() == Qt.ForwardButton:
+            self.label.setText('mouseReleaseEvent FORWARD')
 
     def mouseDoubleClickEvent(self, event: QWidget.mouseMoveEvent) -> None:
-        self.label.setText('mouseDoubleClickEvent')
+        """
+        Метод обработчик событий PySide6.QtGui.QMouseEvent
+        """
+        if event.button() == Qt.LeftButton:
+            self.label.setText('mouseDoubleClickEvent LEFT')
+        elif event.button() == Qt.MiddleButton:
+            self.label.setText('mouseDoubleClickEvent MIDDLE')
+        elif event.button() == Qt.RightButton:
+            self.label.setText('mouseDoubleClickEvent RIGHT')
+        elif event.button() == Qt.BackButton:
+            self.label.setText('mouseDoubleClickEvent BACK')
+        elif event.button() == Qt.ForwardButton:
+            self.label.setText('mouseDoubleClickEvent FORWARD')
 
 
 def main() -> None:
