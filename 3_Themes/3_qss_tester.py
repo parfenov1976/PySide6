@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         self.cb = QCheckBox('Checkbox')  # создание экземпляра виджета чекбокса
         self.layout.addWidget(self.cb)
         self.combo = QComboBox()  # создание экземпляра виджета выпадающего списка
+        self.combo.setObjectName('thecombo')  # присвоение имени объекту
         self.combo.addItems(['First', 'Second', 'Third', 'Fourth'])  # добавление элементов в список
         self.layout.addWidget(self.combo)
         self.sp = QSpinBox()  # создание экземпляра виджета спинбокса
