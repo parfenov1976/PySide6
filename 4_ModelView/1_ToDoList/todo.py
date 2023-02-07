@@ -3,6 +3,7 @@
 для PyQt и PySide варианта архитектуры Model View Controller (MVC))
 """
 
+import json
 import sys
 from MainWindow import Ui_MainWindow  # импорт скомпилированного в питон файла UI из Qt Designer
 from PySide6.QtWidgets import QApplication, QMainWindow
@@ -76,6 +77,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Вызывать конструктор Ui_MainWindow не нужно так как у этого супер-класса его нет
         self.setupUi(self)  # вызов метода сборки интерфейса из модуля главного окна MainWindow
         self.model = TodoModel()  # создание экземпляра класса модели списка дел
+        self.load()  # вызов метода загрузки данных из файла в атрибут экземпляра класса модели списка дел
         self.todo_view.setModel(self.model)  # привязка модели к виджету списка подкласса главного окна
         self.add_button.pressed.connect(self.add)  # создание сигнала кнопки добавить и привязка метода ресивера
         self.del_button.pressed.connect(self.delete)  # создание сигнала кнопки удалить и привязка метода ресивера
@@ -95,6 +97,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.model.layoutChanged.emit()  # подача сигнала для представления об изменении данных
             # и необходимости обновления
             self.todo_view.clearSelection()  # сброс выделения в представлении
+        self.save()  # вызов метода сохранения данных из атрибута экземпляра класса списка дел  в файл
 
     def complete(self) -> None:
         """
@@ -113,6 +116,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.model.dataChanged.emit(index, index)  # подача сигнала в модель об изменении данных
             # и необходимости обновления
             self.todo_view.clearSelection()  # сброс выделения в представлении
+        self.save()  # вызов метода сохранения данных из атрибута экземпляра класса списка дел  в файл
 
     def add(self) -> None:
         """
@@ -127,6 +131,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.model.layoutChanged.emit()  # подача сигнала для представления об изменении данных
             # и необходимости обновления
             self.todo_edit.setText('')  # очистка строки в однострочном редактируемом текстовом поле
+        self.save()  # вызов метода сохранения данных из атрибута экземпляра класса списка дел  в файл
+
+    def load(self) -> None:
+        """
+        Метод загрузки данных из файла
+        :return: None
+        """
+        try:  # блок обработки ошибки, на случай если файла не существует
+            with open('data.json', 'r') as file:  # открытие файла данных на чтение
+                self.model.todos = json.load(file)  # извлечение данных из файла и помещение из в аттрибут экземпляра
+                # класса списка дел
+        except FileNotFoundError:  # перехват ошибки, если файл не найден
+            print('previously saved file not found, will be create a new one')  # вывод в консоль сообщения в случае
+            # ошибки Файл не найден
+
+    def save(self) -> None:
+        """
+        Метод записи данных в файл
+        :return: None
+        """
+        with open('data.json', 'w') as file:  # открытие файла данных на запись
+            # если файлы не существует, то он создается
+            json.dump(self.model.todos, file)
 
 
 def main() -> None:
