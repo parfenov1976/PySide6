@@ -7,6 +7,7 @@ import sys
 from MainWindow import Ui_MainWindow  # импорт скомпилированного в питон файла UI из Qt Designer
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCore import Qt, QAbstractListModel
+from PySide6.QtGui import QImage
 
 """
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
@@ -18,10 +19,13 @@ from PySide6.QtCore import Qt, QAbstractListModel
 интерфейс для моделей, которые представляют свои данные в виде простой неиерархической 
 последовательности элементов (списка). Он не используется напрямую, но должен быть подклассом.
 Qt из модуля PySide6.QtCore содержит различные идентификаторы, используемые в библиотеке Qt.
+Импорт из модуля PySide6.QtGui класса изображений QImage.
 """
 
-
 # tag::model[]
+tick = QImage('tick.png')  # создание экземпляра класса изображения с помещением в нем изображения галочки
+
+
 class TodoModel(QAbstractListModel):
     """
     Подкласс модели списка дел от абстрактного супер-класса моделей списков
@@ -37,7 +41,7 @@ class TodoModel(QAbstractListModel):
         # списком, подаваемым в качестве аргумента при создании экземпляра класса модели списка
         # или пустым списком
 
-    def data(self, index, role: int) -> str:
+    def data(self, index, role: int) -> str or QImage:
         """
         Метод для обработки запросов из представления на выборку данных из списка
         :param index: координаты запрашиваемых данных предоставляемых методами .row() и .column()
@@ -49,6 +53,11 @@ class TodoModel(QAbstractListModel):
         if role == Qt.DisplayRole:  # проверка соответствия данных роли текстовой строки (role=0)
             status, text = self.todos[index.row()]  # извлечение данных из записи - статуса и наименования дела
             return text
+        if role == Qt.DecorationRole:  # проверка соответствия данных роли иконки (role=1)
+            status, text = self.todos[index.row()]
+            if status:  # проверка статуса дела
+                return tick  # если дело завершено, то возвращает иконку с изображением галочки
+            # иконка помещается впереди текста, почему?
 
     def rowCount(self, index) -> int:
         """
@@ -117,7 +126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # и наименования дела
             self.model.layoutChanged.emit()  # подача сигнала для представления об изменении данных
             # и необходимости обновления
-            self.todo_edit.setText('')  # создание пустой строки в качестве разделителя пунктов списка
+            self.todo_edit.setText('')  # очистка строки в однострочном редактируемом текстовом поле
 
 
 def main() -> None:
