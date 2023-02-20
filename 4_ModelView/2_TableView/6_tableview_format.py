@@ -48,6 +48,7 @@ class TableModel(QAbstractTableModel):
         :return: str - наименование запрошенного дела
         """
         value = self._data[index.row()][index.column()]
+        # извлечение содержимого ячейки таблицы по координатам, предоставляемым методами .row() и .column()
         if role == Qt.ForegroundRole:
             if (isinstance(value, int) or isinstance(value, float)) and value < 0:
                 return QColor(Qt.red)
@@ -55,7 +56,6 @@ class TableModel(QAbstractTableModel):
             if isinstance(value, int) or isinstance(value, float):  # проверка типа данных
                 return Qt.AlignVCenter | Qt.AlignRight  # возврат указателей выравнивания
         if role == Qt.DisplayRole:  # проверка соответствия данных роли текстовой строки (role=0)
-            # извлечение содержимого ячейки таблицы по координатам, предоставляемым методами .row() и .column()
             # и сохранение в переменную
             if isinstance(value, datetime):  # проверка типа форматов дат
                 return value.strftime("%Y-%m-%d")  # возврат строки даты
@@ -66,7 +66,6 @@ class TableModel(QAbstractTableModel):
             else:
                 return value
         if role == Qt.BackgroundRole:  # проверка соответствия данных роли заднего фона
-            value = self._data[index.row()][index.column()]  # извлечение данных по координатам
             if isinstance(value, int) or isinstance(value, float):
                 value = int(value)  # отбрасывание дробной части для подбора дискретного цвета
                 # подбор цвета производим в пределах -5...+5 все, что больше или меньше принимаем по границе диапазона
