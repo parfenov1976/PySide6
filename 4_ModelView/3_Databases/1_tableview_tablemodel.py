@@ -39,6 +39,23 @@ class MainWindow(QMainWindow):
         self.table.setModel(self.model)  # привязка модели к представлению
         self.model.setTable('Track')  # установка подключения модели к таблице Track в базе данных
         self.model.select()  # выборка всех данных из модели (из подключенной таблицы)
+
+        """
+        Стратегия управления изменениями базы данных:
+        Задается методом model.setEditStrategy()
+        
+        QSqlTableModel.OnFieldChange - изменения применяются автоматически
+        после снятия выделения с редактируемой ячейки (по умолчанию)
+        
+        QSqlTableModel.OnRowChange - изменения применяются автоматически после
+        перехода на другую строку
+        
+        QSqlTableModel.OnManualSubmit - изменения применяются вызовом метода .submitAll()
+        или могут быть отменены вызовом метода revertAll()
+        
+        """
+        self.model.setEditStrategy(QSqlTableModel.OnRowChange)  # установка стратегии управления изменениями
+
         self.setMinimumSize(QSize(1024, 600))  # установка минимального размера главного окна
         self.setCentralWidget(self.table)  # размещение представления таблицы в главном окне приложения
 
