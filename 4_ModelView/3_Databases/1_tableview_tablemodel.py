@@ -16,6 +16,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QTableView
 класса основного окна QMainWindow, класса ярлыка представления таблиц QTableView.
 Импорт из модула PySide6.QtCore класса размеров двухмерных объектов QSize и класса Qt,
 содержащего различные идентификаторы, используемые в библиотеке Qt.
+Импорт из модуля PySide6.QtSql класса для установления связи с базой данных QSqlDatabase, 
+класса модели таблиц, не имеющих связей с другими таблица базы данных, QSqlTableModel.
 """
 
 db = QSqlDatabase('QSQLITE')  # создание экземпляра объекта базы данных с присвоением имени
