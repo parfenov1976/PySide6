@@ -57,6 +57,19 @@ class MainWindow(QMainWindow):
         self.model = QSqlTableModel(db=db)  # создание модели таблицы и привязка к ней базы данных
         self.table.setModel(self.model)  # подключение модели к представлению
         self.model.setTable('Track')  # выбор таблицы модели для передачи в представление
+        column_titles = {
+            'Name': 'Name',
+            'AlbumId': 'Album (ID)',
+            'MediaTypeId': 'Media Type (ID)',
+            'GenreId': 'Genre (ID)',
+            'Compose': 'Composer'
+        }
+        for n, t in column_titles.items():  # извлечение имени столбца в базе и имени для представления
+            idx = self.model.fieldIndex(n)  # извлечение индекса столбца по его имени в базе
+            self.model.setHeaderData(idx, Qt.Horizontal, t)  # присвоение имени столбцу по его индексу в базе
+        # для отображения в представлении
+        # Qt.Horizontal или Qt.Vertical задают или проверяют? ориентацию чего-то? Если задать Vertical,
+        # то имя не присвоится
         self.model.select()  # выборка данных из подключенной таблицы базы данных
 
         self.setMinimumSize(QSize(1024, 600))  # установка минимального размера главного окна
