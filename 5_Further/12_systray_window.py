@@ -86,7 +86,10 @@ class MainWindow(QMainWindow):
         :return: None
         """
         if reason == QSystemTrayIcon.Trigger:  # проверка условия активации
-            self.show()  # показать окно приложения
+            if self.isVisible():  # проверка условия видимости окна приложения
+                self.hide()  # спрятать окно приложения
+            else:
+                self.show()  # показать окно приложения
 
 
 def main() -> None:
