@@ -3,7 +3,6 @@
 Пример рисования линии с использованием настроек пера (размер и цвет) и объекта точки.
 """
 import sys
-from random import choice, randint
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QPainter, QPen, QColor
@@ -12,7 +11,6 @@ from PySide6.QtGui import QPixmap, QPainter, QPen, QColor
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
 командной строки не предполагается, то импорт можно не выполнять. При этом, при создании
 приложения в класс QApplication([]) в качестве аргумента передается пустой список.
-Импорт из модуля random класса случайного выбора choice и класса случайного целого randint.
 Импорт из модуля PySide6.QtCore и класса Qt - содержит различные идентификаторы, используемые
 в библиотеке Qt, класса точки QPoint.
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
