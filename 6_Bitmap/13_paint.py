@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
 
     def add_palette_buttons(self, layout: QHBoxLayout) -> None:
         """
-        Метода для создания элементов палитры и размещения их на слое
+        Метод для создания элементов палитры и размещения их на слое
         :param layout: слой для размещения элементов палитры
         :return: None
         """
