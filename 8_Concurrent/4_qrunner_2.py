@@ -90,16 +90,16 @@ class MainWindow(QMainWindow):
         Метод ресивер (слот) на нажатие кнопки
         :return: None
         """
-        worker = Worker('some', 'arguments', keyward=2)
-        self.threadpool.start(worker)
+        worker = Worker('some', 'arguments', keyward=2)  # создание экземпляра рабочего потока
+        self.threadpool.start(worker)  # запуск рабочего потока на исполнение
 
     def recurring_timer(self) -> None:
         """
         Метод ресивер (слот) на истечение таймера
         :return:
         """
-        self.counter += 1
-        self.label.setText(f'Counter: {self.counter}')
+        self.counter += 1  # увеличение счетчика интервалов времени
+        self.label.setText(f'Counter: {self.counter}')  # обновление счетчика на ярлыке
 
 
 def main() -> None:
