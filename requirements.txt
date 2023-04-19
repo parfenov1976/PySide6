@@ -1,3 +1,4 @@
 PySide6>=6.4, <6.5
 numpy>=1.24, <1.25
 pandas>=1.5, <1.6
+pyqtgraph @ git+https://github.com/pyqtgraph/pyqtgraph@9ef200673a2e1ff17413da33a2d02fdd44ab3a5a
