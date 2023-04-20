@@ -128,19 +128,19 @@ class MainWindow(QMainWindow):
             # в сохраненных ссылках на отрисованные линии. Если идентификатор рабочего потока
             # не найден в словаре, то производится отрисовка линии и сохранение ссылки на нее
             self.x[worker_id] = [x]  # сохранение координаты x
-            self.y[worker_id] = [y]  # сохранение координаты н
+            self.y[worker_id] = [y]  # сохранение координаты y
             pen = pg.mkPen(width=2,  # создание пера со случайным цветом
                            color=(
                                random.randint(100, 255),
                                random.randint(100, 255),
                                random.randint(100, 255),
-                           )
-                           )
+                           ),
+            )
             self.lines[worker_id] = self.graphWidget.plot(self.x[worker_id], self.y[worker_id], pen=pen)
             # рисование линии и сохранение ссылки на нее
-            return  # возврат из цикла
-        self.x[worker_id].append(x)  # обновление величины x
-        self.y[worker_id].append(x)  # обновление величины x
+            return  # возврат из метода
+        self.x[worker_id].append(x)  # обновление величины координаты x
+        self.y[worker_id].append(y)  # обновление величины координаты y
         self.lines[worker_id].setData(self.x[worker_id], self.y[worker_id])
 
 
