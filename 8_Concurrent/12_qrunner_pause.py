@@ -16,10 +16,9 @@ from PySide6.QtWidgets import (QApplication,
                                QPushButton,
                                QWidget,
                                )
-from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, Qt
+from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
 
 """
-Модуль time с библиотеками для работы со временем.
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
 командной строки не предполагается, то импорт можно не выполнять. При этом, при создании
 приложения в класс QApplication([]) в качестве аргумента передается пустой список.
