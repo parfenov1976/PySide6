@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         Метод ресивер (слот) на нажатие кнопки запуска выполнения внешнего процесса
         :return: None
         """
-        self.runner = SubProcessWorker('python3 dummy_script.py')  # создание экземпляра рабочего потока для
+        self.runner = SubProcessWorker('python dummy_script.py')  # создание экземпляра рабочего потока для
         # запуска кода внешнего процесса
         self.runner.signals.result.connect(self.result)  # создание сигнала на нажатие кнопки с привязкой ресивера
         self.threadpool.start(self.runner)  # создание сигнала на завершение выполнения внешнего процесса
