@@ -145,7 +145,7 @@ class MainWindow(QMainWindow):
         # создание экземпляра рабочего потока для запуска кода внешнего процесса dummy_script.py с передачей ссылки
         # на функцию обработчик результатов работы внешнего процесса extract_vars
         self.runner.signals.result.connect(self.result)  # создание сигнала на передачу результата с привязкой ресивера
-        self.threadpool.start(self.runner)  # создание сигнала на завершение выполнения внешнего процесса
+        self.threadpool.start(self.runner)  # запуск рабочего потока
 
     def result(self, data: dict) -> None:
         """
