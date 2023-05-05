@@ -113,8 +113,8 @@ class MainWindow(QMainWindow):
         """
         self.runner = SubProcessWorker('python dummy_script.py')  # создание экземпляра рабочего потока для
         # запуска кода внешнего процесса
-        self.runner.signals.result.connect(self.result)  # создание сигнала на нажатие кнопки с привязкой ресивера
-        self.threadpool.start(self.runner)  # создание сигнала на завершение выполнения внешнего процесса
+        self.runner.signals.result.connect(self.result)  # создание сигнала на получение результата с привязкой ресивера
+        self.threadpool.start(self.runner)  # запуск рабочего потока
 
     def result(self, s: str) -> None:
         """
