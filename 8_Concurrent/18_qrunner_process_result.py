@@ -128,6 +128,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.name)  # размещение текстового поля в слое для виджетов
         layout.addWidget(self.country)  # размещение текстового поля в слое для виджетов
         layout.addWidget(self.website)  # размещение текстового поля в слое для виджетов
+        layout.addWidget(self.number_of_lines)  # размещение спин бокса на слое
         layout.addWidget(btn_run)  # размещение кнопки в слое для виджетов
         container = QWidget()  # создание контейнера для слоев с виджетами
         container.setLayout(layout)  # размещение в контейнере слоя для виджетов
