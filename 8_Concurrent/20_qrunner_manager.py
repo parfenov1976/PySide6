@@ -8,6 +8,9 @@ QThreadPool - менеджер рабочих потоков.
 """
 import subprocess
 import sys
+import time
+import uuid
+import random
 
 from PySide6.QtWidgets import (QApplication,
                                QPlainTextEdit,
@@ -29,6 +32,7 @@ from PySide6.QtCore import (QRunnable,
 
 """
 Модуль subprocess для работы с внешними процессами
+Модуль для работы со случайностью random
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
 командной строки не предполагается, то импорт можно не выполнять. При этом, при создании
 приложения в класс QApplication([]) в качестве аргумента передается пустой список.
@@ -42,6 +46,93 @@ from PySide6.QtCore import (QRunnable,
 Qt - содержит различные идентификаторы, используемые в библиотеке Qt
 Другие виджеты можно найти по ссылке https://doc.qt.io/qt-5/widget-classes.html#basic-widget-classes
 """
+
+STATUS_WAITING = 'waiting'
+STATUS_RUNNING = 'running'
+STATUS_ERROR = 'error'
+STATUS_COMPLETE = 'complete'
+
+STATUS_COLOR = {
+    STATUS_RUNNING: '#33a02c',
+    STATUS_ERROR: '#e31a1c',
+    STATUS_COMPLETE: '#b2bf8a'
+}
+
+DEFAULT_STATE = {'progress': 0, 'status': STATUS_WAITING}
+
+
+class WorkerSignals(QObject):
+    """
+    Класс сигналов рабочего потока, определяющий набор сигналов
+    Перечень поддерживаемых сигналов:
+    finished - нет данных или произвольная строка
+    error - кортеж вида (exctype, value, traceback.format_exc()) где элементы являются строками
+    result - любой объект
+    progress - целое число или строка - процент выполнения
+    status - строка
+    """
+    finished = Signal(str)
+    error = Signal(str, str)
+    result = Signal(str, object)
+    progress = Signal(str, int)
+    status = Signal(str, str)
+
+class Worker(QRunnable):
+    """
+    Рабочий поток - подкласс контейнера для исполняемого кода.
+    Наследуется от супер класса QRannable для управления рабочими потоками, сигналами c
+    результатами работы.
+    """
+    def __init__(self, *args, **kwargs) -> None:
+        """
+        Конструктор рабочего потока.
+        :param args: аргументы для передачи на обработку рабочему потоку
+        :param args: ключевые аргументы для передачи на обработку рабочему потоку
+        """
+        QRunnable.__init__(self)  # явный вызов конструктора родительского класса
+        self.signals = WorkerSignals()  # создание экземпляра класса сигналов рабочего потока
+        self.job_id = str(uuid.uuid4())  # создание уникального идентификатора рабочего потока
+        self.args = args  # сохранение аргументов в аттрибуте рабочего потока
+        self.kwargs = kwargs  # сохранение ключевых аргументов в аттрибуте рабочего потока
+        self.signals.status.emit(self.job_id, STATUS_WAITING)  # передача данных рабочего потока при его создании
+        # сигналу получения статуса. При создании рабочему потоку присваивается статус Ожидает
+
+    @Slot  # данный декоратор помечает метод как слот с кодом для исполнения
+    def run(self):
+        """
+        Код, который необходимо выполнить помещаем в метод с именем run()
+        Данный код имеет заложенную вероятность возникновения ошибки при делении на ноль
+        """
+        self.signals.status.emit(self.job_id, STATUS_RUNNING)  # передача данных рабочего потока при его запуске
+        # сигналу получения статуса. При запуске рабочему потоку присваивается статус Выполняется
+        x, y = self.args  # распаковка аргументов в переменные
+        try:  # блок обработки исключений
+            value = random.randint(0, 100) * x  # создание случайной величины
+            delay = random.random() / 10  # создание случайной величины задержки
+            result = []  # создание списка для хранения результата
+            for n in range(100):  # создание цикла вычислительной нагрузки и генерации результата
+                value = value / y   # вычисление некоего значения, при y=0 будет сгенерировано исключение
+                y -= 1
+                result.append(value)  # сохранение вычисленного значения в списке результатов
+                self.signals.progress.emit(self.job_id, n + 1)  # передача данных о прогрессе выполнения
+                # сигналу о его изменении
+                time.sleep(delay)  # запуск задержки выполнения
+        except Exception as e:  # перехват исключения
+            print(e)  # вывод текста ошибки
+            self.signals.error.emit(self.job_id, str(e))  # передача данных об ошибке сигналу получения ошибки
+            self.signals.status.emit(self.job_id, STATUS_ERROR)  # передача данных рабочего потока
+            # при возникновении ошибки сигналу о получении статуса рабочего процесса
+        else:  # блок если ошибки не возникло
+            self.signals.result.emit(self.job_id, result)  # передача результатов работы рабочего потока
+            # сигналу о получении результата
+            self.signals.status.emit(self.job_id, STATUS_COMPLETE)  # передача данных рабочего потока
+            # при его успешном завершении сигналу о получении статуса
+
+        self.signals.finished.emit(self.job_id)  # передача идентификатора рабочего потока сигналу
+        # о завершении его выполнения
+
+
+
 
 
 class WorkerManager(QAbstractListModel):
@@ -167,6 +258,7 @@ class WorkerManager(QAbstractListModel):
         :return: - количество строк
         """
         return len(self._state)
+
 
 
 def main() -> None:
