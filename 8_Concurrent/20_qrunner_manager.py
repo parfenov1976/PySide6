@@ -11,14 +11,17 @@ import sys
 import time
 import uuid
 import random
+import traceback
 
 from PySide6.QtWidgets import (QApplication,
+                               QListView,
                                QPlainTextEdit,
                                QVBoxLayout,
                                QMainWindow,
                                QPushButton,
                                QWidget,
-                               QProgressBar
+                               QProgressBar,
+                               QStyledItemDelegate
                                )
 from PySide6.QtCore import (QRunnable,
                             Qt,
@@ -27,23 +30,30 @@ from PySide6.QtCore import (QRunnable,
                             Signal,
                             QObject,
                             QAbstractListModel,
-                            QTimer
+                            QTimer,
+                            QRect,
                             )
+from PySide6.QtGui import QPen, QColor, QBrush
 
 """
 Модуль subprocess для работы с внешними процессами
+Модуль traceback для работы с трассировками стека программы.
 Модуль для работы со случайностью random
+Модуль uuid для генерации уникальных идентификаторов
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
 командной строки не предполагается, то импорт можно не выполнять. При этом, при создании
 приложения в класс QApplication([]) в качестве аргумента передается пустой список.
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и класса слоев
 для виджетов с вертикальной организацией QVBoxLayout, класса виджета кнопки QPushButton,
 класс виджета многострочного редактируемого текстового поля QLineEdit, класс базового виджета QWidget,
-класс виджета индикатора прогресса QProgressBar.
+класс виджета индикатора прогресса QProgressBar, класс отображения списка для модели списка QListView,
+класс QStyledItemDelegate предоставляет средства отображения и редактирования элементов данных из модели.
 Импорт из модуля PySide6.QtCore класс контейнера для исполняемого кода QRunnable,
 класс менеджера потоков QThreadPool, класс декоратора Slot, класс сигнала Signal, класс базового объекта QObject,
-класса для работы с таймером QTimer, абстрактный класс модели списка QAbstractListModel
+класса для работы с таймером QTimer, абстрактный класс модели списка QAbstractListModel, класс прямоугольника QRect
 Qt - содержит различные идентификаторы, используемые в библиотеке Qt
+Импорт из модуля PySide6.QtGui класс для установки размера пера (толщины линии)
+и цвета для рисования QPen, класс объекта цветов QColor, класса кисти QBrush для закрашивания.
 Другие виджеты можно найти по ссылке https://doc.qt.io/qt-5/widget-classes.html#basic-widget-classes
 """
 
@@ -77,12 +87,14 @@ class WorkerSignals(QObject):
     progress = Signal(str, int)
     status = Signal(str, str)
 
+
 class Worker(QRunnable):
     """
     Рабочий поток - подкласс контейнера для исполняемого кода.
     Наследуется от супер класса QRannable для управления рабочими потоками, сигналами c
     результатами работы.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         """
         Конструктор рабочего потока.
@@ -111,7 +123,7 @@ class Worker(QRunnable):
             delay = random.random() / 10  # создание случайной величины задержки
             result = []  # создание списка для хранения результата
             for n in range(100):  # создание цикла вычислительной нагрузки и генерации результата
-                value = value / y   # вычисление некоего значения, при y=0 будет сгенерировано исключение
+                value = value / y  # вычисление некоего значения, при y=0 будет сгенерировано исключение
                 y -= 1
                 result.append(value)  # сохранение вычисленного значения в списке результатов
                 self.signals.progress.emit(self.job_id, n + 1)  # передача данных о прогрессе выполнения
@@ -130,9 +142,6 @@ class Worker(QRunnable):
 
         self.signals.finished.emit(self.job_id)  # передача идентификатора рабочего потока сигналу
         # о завершении его выполнения
-
-
-
 
 
 class WorkerManager(QAbstractListModel):
@@ -260,6 +269,24 @@ class WorkerManager(QAbstractListModel):
         return len(self._state)
 
 
+class ProgressBarDelegate(QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        job_id, data = index.model().data(index, Qt.DisplayRole)  # извлечение из объекта индекса модели
+        # идентификатора рабочего потока и словаря состояний, который содержит статус и прогресс, в переменные
+        if data['progress'] > 0:
+            color = QColor(STATUS_COLOR[data['status']])  # создание объекта цвета для строки
+            brush = QBrush()  # создание экземпляра класса кисти для закрашивания
+            brush.setColor(color)  # установка цвета закрашивания
+            brush.setStyle(Qt.SolidPattern)  # установка стиля (узора) закрашивания - сплошной
+            width = option.rect.width() * data['progress'] / 100  # вычисление ширины области закрашивания
+            rect = QRect(option.rect)  # создание экземпляра класса прямоугольника для закрашивания
+            rect.setWidth(width)  # установка ширины области закрашивания для строки
+            painter.fillRect(rect, brush)  # закрашивание прямоугольника согласно настройками кисти
+        pen = QPen()  # создание экземпляра класса пера
+        pen.setColor(Qt.black)  # установка цвета пера
+        painter.drawText(option.rect, Qt.AlignLeft, job_id)  # вывод уникального идентификатора рабочего потока
+        # в прямоугольник для закрашивания
+
 
 def main() -> None:
     """
@@ -268,6 +295,7 @@ def main() -> None:
     """
     app = QApplication(sys.argv)  # создание экземпляра класса основного цикла событий приложения
     window = MainWindow()  # создание экземпляра класса главного окна приложения
+    app.setStyle('Fusion')  # более интересная глобальная кроссплатформенна тема Fusion
     window.show()  # установка видимости главного окна (по умолчанию окно спрятано)
     app.exec()  # запуск основного цикла событий приложения
 
