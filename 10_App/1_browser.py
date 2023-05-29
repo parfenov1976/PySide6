@@ -6,22 +6,35 @@
 """
 
 import sys
+import os
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, QSize
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar
+from PySide6.QtGui import QAction, QIcon
 
 """
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
 командной строки не предполагается, то импорт можно не выполнять. При этом, при создании
 приложения в класс QtWidgets.QApplication([]) в качестве аргумента передается пустой список.
-Импорт из модуля ядра PySide6.QtCore класса для работы с Url-адресами QUrl.
+
+Модуль os для извлечения путей операционной системы и работы с путями.
+
+Импорт из модуля ядра библиотеки PySide6.QtCore класса для работы с Url-адресами QUrl.
+
 Импорт из модуля ядра веб виджетов PySide6.QtWebEngineWidgets класса ядра браузера
-для отображения веб страничек QWebEngineView.
+для отображения веб страничек QWebEngineView, класса для создания объектов для размеров
+двухмерных объектов QSize.
+
+Модуль PySide6.QtWidgets предоставляет элементы пользовательского интерфейса для классических приложений на ПК.
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
-класса основного окна QMainWindow.
+класса основного окна QMainWindow, класса виджета панели инструментов QToolBar.
+
+Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
+Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon.
 """
 
+GO_HOME = 'https://www.yandex.ru'
 
 class MainWindow(QMainWindow):
     """
@@ -34,8 +47,45 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self)  # явный вызов конструктора родительского класса
         self.browser = QWebEngineView()  # создание экземпляра класса ядра браузера дял отображения веб страниц
-        self.browser.setUrl(QUrl('https://www.yandex.ru'))  # установка начального адреса для просмотра
+        self.browser.setUrl(QUrl(GO_HOME))  # установка начального адреса для просмотра
         self.setCentralWidget(self.browser)  # размещение представления веб страницы в главном окне приложения
+
+        navtb = QToolBar('Navigation')  # создание экземпляра класса панели инструментов
+        navtb.setIconSize(QSize(16, 16))  # установка размеров места для иконок
+        navtb.setMovable(False)  # закрепить панель инструментов
+        self.addToolBar(navtb)  # добавление на главное окно панели инструментов
+
+        self.statusBar()  # включение в окне строки состояния
+
+        back_btn = QAction(QIcon(os.path.join('icons', 'arrow-180.png')), 'Back', self)  # создание объекта инструмента
+        # с кнопкой "Назад" с указанием имени кнопки, отображаемого во всплывающей подсказке
+        back_btn.setStatusTip('Back to previous page')  # установка текста подсказки для отображения в строке состояния
+        back_btn.triggered.connect(self.browser.back)  # создание сигнала на активацию кнопки с привязкой метода
+        # ресивера, встроенного в класс ядра браузера
+        navtb.addAction(back_btn)  # добавление инструмента (команды) на панель
+
+        next_btn = QAction(QIcon(os.path.join('icons', 'arrow-000.png')), 'Forward', self)  # создание объекта
+        # инструмента с кнопкой "Вперед" с указанием имени кнопки, отображаемого во всплывающей подсказке
+        next_btn.setStatusTip('Forward to next page')  # установка текста подсказки для отображения в строке состояния
+        next_btn.triggered.connect(self.browser.forward)  # создание сигнала на активацию кнопки с привязкой метода
+        # ресивера, встроенного в класс ядра браузера
+        navtb.addAction(next_btn)  # добавление инструмента (команды) на панель
+
+        reload_btn = QAction(QIcon(os.path.join('icons', 'arrow-circle-315.png')), 'Reload', self)  # создание объекта
+        # инструмента с кнопкой "Обновление странички" с указанием имени кнопки, отображаемого во всплывающей подсказке
+        reload_btn.setStatusTip('Reload page')  # установка текста подсказки для отображения в строке состояния
+        reload_btn.triggered.connect(self.browser.reload)  # создание сигнала на активацию кнопки с привязкой метода
+        # ресивера, встроенного в класс ядра браузера
+        navtb.addAction(reload_btn)  # добавление инструмента (команды) на панель
+
+        home_btn = QAction(QIcon(os.path.join('icons', 'home.png')), 'Home', self)  # создание объекта инструмента
+        # с кнопкой "Домой" с указанием имени кнопки, отображаемого во всплывающей подсказке
+        home_btn.setStatusTip('Go home')  # установка текста подсказки для отображения в строке состояния
+        home_btn.triggered.connect(self.navigate_home)  # создание сигнала с привязкой метода ресивера
+        navtb.addAction(home_btn)  # добавление инструмента (команды) на панель
+
+    def navigate_home(self) -> None:
+        self.browser.setUrl(QUrl(GO_HOME))
 
 
 def main() -> None:
