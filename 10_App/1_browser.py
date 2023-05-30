@@ -10,7 +10,14 @@ import os
 
 from PySide6.QtCore import QUrl, QSize
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar
+from PySide6.QtWidgets import (QApplication,
+                               QMainWindow,
+                               QToolBar,
+                               QDialog,
+                               QDialogButtonBox,
+                               QVBoxLayout,
+                               QLineEdit,
+                               )
 from PySide6.QtGui import QAction, QIcon
 
 """
@@ -28,13 +35,15 @@ from PySide6.QtGui import QAction, QIcon
 
 Модуль PySide6.QtWidgets предоставляет элементы пользовательского интерфейса для классических приложений на ПК.
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
-класса основного окна QMainWindow, класса виджета панели инструментов QToolBar.
+класса основного окна QMainWindow, класса виджета панели инструментов QToolBar, класс виджета диалогового окна QDialog,
+класса кнопок для диалогового окна QDialogButtonBox, класс слоя для виджетов с вертикальной организацией QVBoxLayout,
+класса виджета однострочного редактируемого текстового поля QLineEdit.
 
 Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
 Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon.
 """
-
 GO_HOME = 'https://www.yandex.ru'
+
 
 class MainWindow(QMainWindow):
     """
@@ -84,8 +93,58 @@ class MainWindow(QMainWindow):
         home_btn.triggered.connect(self.navigate_home)  # создание сигнала с привязкой метода ресивера
         navtb.addAction(home_btn)  # добавление инструмента (команды) на панель
 
+        set_home_btn = QAction(QIcon(os.path.join('icons', 'gear.png')), 'Set home page URL', self)  # создание объекта
+        # инструмента с кнопкой для установки адреса домашней странички
+        set_home_btn.setStatusTip('Set home page URL')  # установка текста подсказки для отображения в строке состояния
+        set_home_btn.triggered.connect(self.set_home_page)  # создание сигнала с привязкой метода ресивера
+        navtb.addAction(set_home_btn)  # добавление инструмента (команды) на панель
+
+    def set_home_page(self) -> None:
+        """
+        Метод ресивер сигнала вызова диалогового окна для установки адреса домашней страницы
+        :return: None
+        """
+        global GO_HOME  # создание ссылки на глобальную переменную
+        dlg = SetHomeDialog(self)  # создание диалогового окна
+        dlg.url_line.setText(GO_HOME)  # считывание текущего адреса домашней страницы в текстовое поле
+        if dlg.exec():  # проверка условия нажатия на кнопки
+            GO_HOME = dlg.url_line.text()  # установка содержимого текстового поля в переменную
+            # для адреса домашней страницы
+
     def navigate_home(self) -> None:
+        """
+        Метод ресивер сигнала перехода на домашнюю страницу
+        :return: None
+        """
         self.browser.setUrl(QUrl(GO_HOME))
+
+
+class SetHomeDialog(QDialog):
+    """
+    Класс диалогового окна для настройки адреса домашней страницы от супер-класса диалоговых окон
+    """
+
+    def __init__(self, parent: QMainWindow = None) -> None:
+        """
+        Конструктор диалогового окна
+        :param parent: ссылка на родительский объект
+        """
+        QDialog.__init__(self, parent)  # явный вызов родительского класса
+        self.setWindowTitle('Set home page URL')  # установка названия диалогового окна
+        self.setMinimumSize(QSize(500, 75))  # установка минимального размера диалогового окна
+        self.url_line = QLineEdit()  # создание строки для ввода адреса домашней странички
+        self.url_line.setPlaceholderText('Enter home page URL')  # установка текста, который отображается в пустом поле
+        self.buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel  # создание списка кнопок диалогового окна
+        # из стандартного пространства имен класса QDialogButtonBox
+        self.button_box = QDialogButtonBox(self.buttons)  # создание кнопок диалогового окна из списка
+        self.button_box.setCenterButtons(True)  # центровка кнопок
+        self.button_box.accepted.connect(self.accept)  # создание сигнала для кнопки OK
+        self.button_box.rejected.connect(self.reject)  # создание сигнала для кнопки Cancel
+        self.layout = QVBoxLayout()  # создание слоя для виджетов
+        self.layout.addWidget(self.url_line)  # добавление на слой диалогового окна строки для адреса
+        self.layout.addWidget(self.button_box)  # добавление кнопок на слой диалогового окна
+        self.setLayout(self.layout)  # размещение слоя в диалоговом окне
+        self.show()  # метод для установки видимости диалогового окна
 
 
 def main() -> None:
