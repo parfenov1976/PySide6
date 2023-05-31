@@ -17,8 +17,9 @@ from PySide6.QtWidgets import (QApplication,
                                QDialogButtonBox,
                                QVBoxLayout,
                                QLineEdit,
+                               QLabel,
                                )
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction, QIcon, QPixmap
 
 """
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
@@ -37,10 +38,11 @@ from PySide6.QtGui import QAction, QIcon
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
 класса основного окна QMainWindow, класса виджета панели инструментов QToolBar, класс виджета диалогового окна QDialog,
 класса кнопок для диалогового окна QDialogButtonBox, класс слоя для виджетов с вертикальной организацией QVBoxLayout,
-класса виджета однострочного редактируемого текстового поля QLineEdit.
+класса виджета однострочного редактируемого текстового поля QLineEdit, класс виджета ярлыка QLabel.
 
 Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
-Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon.
+Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon,
+класс представления изображения QPixmap.
 """
 GO_HOME = 'https://www.yandex.ru'
 
@@ -57,6 +59,10 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)  # явный вызов конструктора родительского класса
         self.browser = QWebEngineView()  # создание экземпляра класса ядра браузера дял отображения веб страниц
         self.browser.setUrl(QUrl(GO_HOME))  # установка начального адреса для просмотра
+        self.browser.urlChanged.connect(self.update_urlbar)  # создание сигнала на изменение адреса странички при клике
+        # по ссылке с привязкой метода ресивера на обновление адресной строки
+        self.browser.loadFinished.connect(self.update_title)  # создание сигнала на завершение загрузки странички
+        # с привязкой метода ресивер на обновление заголовка окна
         self.setCentralWidget(self.browser)  # размещение представления веб страницы в главном окне приложения
 
         navtb = QToolBar('Navigation')  # создание экземпляра класса панели инструментов
@@ -99,6 +105,23 @@ class MainWindow(QMainWindow):
         set_home_btn.triggered.connect(self.set_home_page)  # создание сигнала с привязкой метода ресивера
         navtb.addAction(set_home_btn)  # добавление инструмента (команды) на панель
 
+        self.httpsicon = QLabel()  # создание ярлыка для изображения
+        self.httpsicon.setPixmap(QPixmap(os.path.join('icons', 'lock-nossl.png')))  # создание изображения на ярлыке
+        navtb.addWidget(self.httpsicon)  # размещение изображения на панели инструментов
+
+        self.urlbar = QLineEdit()  # создание текстового поля для адреса странички
+        self.urlbar.returnPressed.connect(self.navigate_to_url)  # создание сигнала на нажатие кнопки ввода
+        # с привязкой метода ресивера перехода по адресу в строке
+        navtb.addWidget(self.urlbar)  # размещение адресной строки на панели инструментов
+
+        stop_btn = QAction(QIcon(os.path.join('icons', 'cross-circle.png')), 'Stop', self)  # создание объекта
+        # инструмента с кнопкой стоп для остановки загрузки странички
+        stop_btn.setStatusTip('Stop loading current page')  # установка текста подсказки для отображения
+        # в строке состояния
+        stop_btn.triggered.connect(self.browser.stop)  # создание сигнала на остановку загрузки странички
+        # с привязкой метода ресивера, встроенного в класс ядра браузера
+        navtb.addAction(stop_btn)  # добавление инструмента (команды) на панель
+
     def set_home_page(self) -> None:
         """
         Метод ресивер сигнала вызова диалогового окна для установки адреса домашней страницы
@@ -117,6 +140,40 @@ class MainWindow(QMainWindow):
         :return: None
         """
         self.browser.setUrl(QUrl(GO_HOME))
+
+    def navigate_to_url(self) -> None:
+        """
+        Метод ресивер для перехода по ссылке
+        :return: None
+        """
+        q = QUrl(self.urlbar.text())  # извлечение текста из текстового поля, преобразование его в ссылку url
+        # и ее сохранение в переменную
+        if q.scheme() == '':  # проверка схемы ссылки
+            q.setScheme('http')  # если схема пустая, то это значит что адрес относительный и нужно добавить схему
+        self.browser.setUrl(q)  # переход по ссылке
+
+    def update_urlbar(self, q: QUrl) -> None:
+        """
+        Метод ресивер на обновление содержимого адресной строки
+        :param q: QUrl - ссылка с адресом странички
+        :return: None
+        """
+        if q.scheme() == 'https':  # проверка схемы ссылки
+            self.httpsicon.setPixmap(QPixmap(os.path.join('icons', 'lock-ssl.png')))  # установка иконки безопасного
+            # соединения
+        else:
+            self.httpsicon.setPixmap(QPixmap(os.path.join('icons', 'lock-nossl.png')))  # установка иконки небезопасного
+            # соединения
+        self.urlbar.setText(q.toString())  # преобразование ссылки в текст и запись его в текстовое поле
+        self.urlbar.setCursorPosition(0)  # смещение курсора в начало поля
+
+    def update_title(self) -> None:
+        """
+        Метод ресивер для изменения заголовка окна
+        :return: None
+        """
+        title = self.browser.page().title()  # извлечение заголовка странички
+        self.setWindowTitle(f'{title} - Mozzarella Ashbadger')  # установка заголовка окна с заголовком странички
 
 
 class SetHomeDialog(QDialog):
@@ -144,7 +201,8 @@ class SetHomeDialog(QDialog):
         self.layout.addWidget(self.url_line)  # добавление на слой диалогового окна строки для адреса
         self.layout.addWidget(self.button_box)  # добавление кнопок на слой диалогового окна
         self.setLayout(self.layout)  # размещение слоя в диалоговом окне
-        self.show()  # метод для установки видимости диалогового окна
+        # self.show()  # метод для установки видимости диалогового окна, если далее в коде будет
+        # метод запуска .exec() для данного окна, то данный вызов не требуется
 
 
 def main() -> None:
