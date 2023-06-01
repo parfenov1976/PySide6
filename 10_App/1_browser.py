@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (QApplication,
                                QVBoxLayout,
                                QLineEdit,
                                QLabel,
+                               QFileDialog,
                                )
 from PySide6.QtGui import QAction, QIcon, QPixmap
 
@@ -38,7 +39,8 @@ from PySide6.QtGui import QAction, QIcon, QPixmap
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
 класса основного окна QMainWindow, класса виджета панели инструментов QToolBar, класс виджета диалогового окна QDialog,
 класса кнопок для диалогового окна QDialogButtonBox, класс слоя для виджетов с вертикальной организацией QVBoxLayout,
-класса виджета однострочного редактируемого текстового поля QLineEdit, класс виджета ярлыка QLabel.
+класса виджета однострочного редактируемого текстового поля QLineEdit, класс виджета ярлыка QLabel,
+класс диалоговых окон для работы с файлами QFileDialog
 
 Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
 Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon,
@@ -122,6 +124,26 @@ class MainWindow(QMainWindow):
         # с привязкой метода ресивера, встроенного в класс ядра браузера
         navtb.addAction(stop_btn)  # добавление инструмента (команды) на панель
 
+        file_menu = self.menuBar().addMenu('&File')  # создание меню Файл
+        open_file_action = QAction(QIcon(os.path.join('icons', 'disk--arrow.png')), 'Open file...', self)  # создание
+        # объекта инструмента с кнопкой открыть файл с указанием имени инструмента (в данном случае, для меню,
+        # отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано с вертикальной
+        # организацией пунктов меню)
+        open_file_action.setStatusTip('Open from file')  # установка текста подсказки для отображения в строке состояния
+        open_file_action.triggered.connect(self.open_file)  # создание сигнала на кнопку открытия файла
+        # с привязкой метода ресивера
+        file_menu.addAction(open_file_action)  # добавление инструмента в меню Файл
+
+        save_file_action = QAction(QIcon(os.path.join('icons', 'disk--pencil.png')), 'Save Page As...', self)
+        # создание объекта инструмента с кнопкой сохранить в файл с указанием имени инструмента (в данном случае,
+        # для меню, отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано
+        # с вертикальной организацией пунктов меню)
+        save_file_action.setStatusTip('Save current page to file')  # установка текста подсказки для отображения
+        # в строке состояния
+        save_file_action.triggered.connect(self.save_file)  # создание сигнала на кнопку открытия сохранения в файл
+        # с привязкой метода ресивера
+        file_menu.addAction(save_file_action)  # добавление инструмента в меню Файл
+
     def set_home_page(self) -> None:
         """
         Метод ресивер сигнала вызова диалогового окна для установки адреса домашней страницы
@@ -174,6 +196,59 @@ class MainWindow(QMainWindow):
         """
         title = self.browser.page().title()  # извлечение заголовка странички
         self.setWindowTitle(f'{title} - Mozzarella Ashbadger')  # установка заголовка окна с заголовком странички
+
+    def open_file(self):
+        """
+        Метод ресивер для загрузки файла странички с использованием встроенной функции для создания
+        диалогового окна для открытия файла QFileDialog.getOpenFileName()
+        :return: None
+        """
+        # создание диалогового окна на открытие файла
+        # в _ передается выбор фильтра файлов в диалоговом окне
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            'Open file',
+            '',
+            'Hypertext Markup Language (*,htm *.html);;' 'All Files (*.*)',
+        )
+        if filename:  # проверка условия выбран ли файла
+            with open(filename, 'r') as f:  # открытие файла на чтение
+                html = f.read()  # чтение файла в переменную
+
+            self.browser.setHtml(html)  # передача содержимого переменной на отображение в ядро браузера
+            self.urlbar.setText(filename)  # установка заголовка окна
+
+    def save_file(self):
+        """
+        Метод ресивер для сохранения странички в файл с использованием встроенной функции для создания
+        диалогового окна для открытия файла QFileDialog.getSaveFileName()
+        Для получения странички используется метод self.browser.page().toHtml(). Это асинхронный метода и это
+        подразумевает, что страничке не будет получена немедленно. Вместо этого нужно передать метод обратного вызова,
+        который получит страничку, как только она будет готова. Для этого нужно создать простую функцию записи, которая
+        выполнит данную работу, используя имя файла из локально области видимости.
+        :return: None
+        """
+        # создание диалогового окна на запись файла
+        # в _ передается выбор фильтра файлов в диалоговом окне
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            'Save Page As',
+            '',
+            'Hypertext Markup Language (*,htm *.html);;' 'All Files (*.*)',
+        )
+        if filename:  # проверка условия задано ли имя файла
+            def writer(html: QWebEngineView) -> None:
+                """
+                Функция записи конда страничка в файл
+                Не работает со страничками из интернета
+                :param html: код html странички
+                :return: None
+                """
+                with open(filename, 'w') as f:  # открытие файла на запись, если файла нет, то он создается
+                    f.write(html)  # запись кода страничка в файл
+
+            self.browser.page().toHtml(writer)  # чтение кода странички и обратный вызов функции записи
+            # с передачей ей кода
 
 
 class SetHomeDialog(QDialog):
