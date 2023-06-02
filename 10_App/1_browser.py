@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QApplication,
                                QFileDialog,
                                )
 from PySide6.QtGui import QAction, QIcon, QPixmap
+from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 
 """
 Модуль sys нужен для доступа к аргументам командной строки. Если использование аргументов
@@ -45,6 +46,9 @@ from PySide6.QtGui import QAction, QIcon, QPixmap
 Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
 Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon,
 класс представления изображения QPixmap.
+
+Импорт из модуля поддержки принтеров PySide6.QtPrintSupport класса диалогового окна для печати QPrintDialog,
+класса устройства вывода на принтер QPrinter.  
 """
 GO_HOME = 'https://www.yandex.ru'
 
@@ -144,6 +148,14 @@ class MainWindow(QMainWindow):
         # с привязкой метода ресивера
         file_menu.addAction(save_file_action)  # добавление инструмента в меню Файл
 
+        print_action = QAction(QIcon(os.path.join('icons', 'printer.png')), 'Print...', self)  # создание объекта
+        # инструмента с кнопкой печати текущей странички
+        print_action.setStatusTip('Print current page')  # указание текста подсказки для отображения в строке состояния
+        print_action.triggered.connect(self.print_page)  # создание сигнала на нажатие кнопки печати с привязкой
+        # метода ресивера
+        file_menu.addAction(print_action)  # добавление инструмента печати в меню файл
+        self.printer = QPrinter()  # создание экземпляра класса устройства вывода на принтер
+
     def set_home_page(self) -> None:
         """
         Метод ресивер сигнала вызова диалогового окна для установки адреса домашней страницы
@@ -152,7 +164,7 @@ class MainWindow(QMainWindow):
         global GO_HOME  # создание ссылки на глобальную переменную
         dlg = SetHomeDialog(self)  # создание диалогового окна
         dlg.url_line.setText(GO_HOME)  # считывание текущего адреса домашней страницы в текстовое поле
-        if dlg.exec():  # проверка условия нажатия на кнопки
+        if dlg.exec():  # запуск цикла событий диалогового окна и проверка условия нажатия на кнопки
             GO_HOME = dlg.url_line.text()  # установка содержимого текстового поля в переменную
             # для адреса домашней страницы
 
@@ -237,7 +249,7 @@ class MainWindow(QMainWindow):
             'Hypertext Markup Language (*,htm *.html);;' 'All Files (*.*)',
         )
         if filename:  # проверка условия задано ли имя файла
-            def writer(html: QWebEngineView) -> None:
+            def writer(html: str) -> None:
                 """
                 Функция записи конда страничка в файл
                 Не работает со страничками из интернета
@@ -249,6 +261,19 @@ class MainWindow(QMainWindow):
 
             self.browser.page().toHtml(writer)  # чтение кода странички и обратный вызов функции записи
             # с передачей ей кода
+
+    def print_page(self) -> None:
+        """
+        Метод ресивер для вывода странички на принтер с использованием встроенной функции для создания
+        диалогового окна для печати QPrintDialog()
+        Для вывода странички используется метод self.browser.print().
+        :return: None
+        """
+        dlg = QPrintDialog(self.printer)  # создание диалогового окна печати с привязкой устройства вывода
+        if dlg.exec() == QDialog.Accepted:  # запуск цикла событий диалогового окна проверка условия,
+            # что выбрана кнопка принять в диалоговом окне
+            self.browser.print(self.printer)  # вызов метода вывода странички на печать
+            # и передача ему ссылки на устройство печати
 
 
 class SetHomeDialog(QDialog):
