@@ -8,7 +8,7 @@
 import sys
 import os
 
-from PySide6.QtCore import QUrl, QSize
+from PySide6.QtCore import QUrl, QSize, Qt
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QApplication,
                                QMainWindow,
@@ -30,11 +30,11 @@ from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 
 Модуль os для извлечения путей операционной системы и работы с путями.
 
-Импорт из модуля ядра библиотеки PySide6.QtCore класса для работы с Url-адресами QUrl.
+Импорт из модуля ядра библиотеки PySide6.QtCore класса для работы с Url-адресами QUrl, класса для объектов размеров
+двухмерных объектов QSize, класса набора имен различных параметров Qt.
 
 Импорт из модуля ядра веб виджетов PySide6.QtWebEngineWidgets класса ядра браузера
-для отображения веб страничек QWebEngineView, класса для создания объектов для размеров
-двухмерных объектов QSize.
+для отображения веб страничек QWebEngineView.
 
 Модуль PySide6.QtWidgets предоставляет элементы пользовательского интерфейса для классических приложений на ПК.
 Импорт из модуля PySide6.QtWidgets класса для управления приложением QApplication и
@@ -129,6 +129,7 @@ class MainWindow(QMainWindow):
         navtb.addAction(stop_btn)  # добавление инструмента (команды) на панель
 
         file_menu = self.menuBar().addMenu('&File')  # создание меню Файл
+
         open_file_action = QAction(QIcon(os.path.join('icons', 'disk--arrow.png')), 'Open file...', self)  # создание
         # объекта инструмента с кнопкой открыть файл с указанием имени инструмента (в данном случае, для меню,
         # отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано с вертикальной
@@ -155,6 +156,27 @@ class MainWindow(QMainWindow):
         # метода ресивера
         file_menu.addAction(print_action)  # добавление инструмента печати в меню файл
         self.printer = QPrinter()  # создание экземпляра класса устройства вывода на принтер
+
+        help_menu = self.menuBar().addMenu('&Help')  # создание меню помощи
+
+        about_action = QAction(QIcon(os.path.join('icons', 'question.png')), 'About Mozzarella Ashbadger', self)
+        # создание объекта инструмента вызова информации о браузере
+        about_action.setStatusTip('Find out mort about Mozzarella Ashbadger')  # указание текста подсказки для
+        # отображения в строке состояния
+        about_action.triggered.connect(self.about)  # создание сигнала на нажатие кнопки вызова информации о браузере
+        # и привязка метода ресивера вывода данной информации
+        help_menu.addAction(about_action)  # добавление инструмента вызова информации о браузере в меню помощи
+
+        navigate_mozzarella_action = QAction(QIcon(os.path.join('icons', 'lifebuoy.png')),
+                                             'Mozzarella Ashbadger Homepage',
+                                             self,
+                                             )
+        navigate_mozzarella_action.setStatusTip('Go to Mozzarella Ashbadger Homepage')  # указание текста подсказки для
+        # отображения в строке состояния
+        navigate_mozzarella_action.triggered.connect(self.navigate_mozzarella)  # создание сигнала на нажатие кнопки
+        # перехода на домашнюю страничку и привязка метода ресивера
+        help_menu.addAction(navigate_mozzarella_action)  # добавление инструмента перехода на домашнюю страничку
+        # в меню помощи
 
     def set_home_page(self) -> None:
         """
@@ -274,6 +296,59 @@ class MainWindow(QMainWindow):
             # что выбрана кнопка принять в диалоговом окне
             self.browser.print(self.printer)  # вызов метода вывода странички на печать
             # и передача ему ссылки на устройство печати
+
+    def navigate_mozzarella(self) -> None:
+        """
+        Метод ресивер перехода на домашнюю страничку
+        :return: None
+        """
+        self.browser.setUrl(QUrl('http://www.pythonguis.com/'))  # вызов метода перехода по ссылке
+
+    def about(self) -> None:
+        """
+        Метод ресивер вызова информации о браузере
+        :return: None
+        """
+        dlg = AboutDialog()  # создание экземпляра класса диалогового окна сведений о браузере
+        dlg.exec()  # запуск цикла событий диалогового окна
+
+
+class AboutDialog(QDialog):
+    """
+    Класс диалогового окна сведений о браузере от супер-класса диалоговых окон
+    """
+    def __init__(self) -> None:
+        """
+        Конструктор диалогового окна сведений о браузере
+        """
+        QDialog.__init__(self)  # явный вызов конструктора родительского класса
+
+        ok_btn = QDialogButtonBox.Ok  # создание кнопки ОК для диалогового окна
+        self.button_box = QDialogButtonBox(ok_btn)  # создание блока кнопок и размещение кнопки в нем
+        self.button_box.accepted.connect(self.accept)  # создание сигнала на нажатие кнопки
+        self.button_box.rejected.connect(self.reject)  # создание сигнала на отказ нажатия кнопки
+
+        layout = QVBoxLayout()  # создание слоя для виджетов с вертикальной организаций
+        title = QLabel('Mozzarella Ashbadger')  # создание ярлыка с надписью
+        font = title.font()  # создание объекта настроек шрифта
+        font.setPointSize(20)  # установка высоты шрифта
+        title.setFont(font)  # применение настроек шрифта к ярлыку
+
+        layout.addWidget(title)  # добавление ярлыка на слой
+
+        logo = QLabel()  # создание пустого ярлыка для последующего размещения изображения
+        logo.setPixmap(QPixmap(os.path.join('icons', 'ma-icon-128.png')))  # добавление на ярлык изображения
+        layout.addWidget(logo)  # добавление ярлыка с лого на слой
+
+        layout.addWidget(QLabel('Version 23.35.211.233232'))  # добавление ярлыка с версией
+        layout.addWidget(QLabel('Copyright 2015 Mozzarella Inc'))  # добавления ярлыка объекта авторского права
+
+        for i in range(0, layout.count()):  # цикл прохода по индексам элементов в слое
+            layout.itemAt(i).setAlignment(Qt.AlignHCenter)  # выравнивание элемента слоя по центру
+
+        layout.addWidget(self.button_box)  # добавление на слой блока кнопок
+
+        self.setLayout(layout)  # размещение слоя с виджетами в диалоговом окне
 
 
 class SetHomeDialog(QDialog):
