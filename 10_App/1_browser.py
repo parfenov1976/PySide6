@@ -385,6 +385,9 @@ def main() -> None:
     Функция запуска кода приложения верхнего уровня
     """
     app = QApplication(sys.argv)  # создание основного цикла событий главного окна
+    app.setApplicationName("Mozzarella Ashbadger")
+    app.setOrganizationName("Mozzarella")
+    app.setOrganizationDomain("mozzarella.org")
     window = MainWindow()  # создание главного окна приложения
     app.setStyle('Fusion')  # установка более красивого стиля интерфейса
     window.show()  # вызов метода главного окна, делающего его видимым (по умолчанию окно спрятано)
