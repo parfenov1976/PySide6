@@ -220,6 +220,11 @@ class MainWindow(QMainWindow):
         i = self.tabs.addTab(browser, label)  # добавление вкладки с отображением веб странички
         # и сохранение в переменную i индекса вкладки, возвращенного методом добавления вкладки
         self.tabs.setCurrentIndex(i)  # установка в качестве текущей вкладки с индексом i
+        browser.urlChanged.connect(lambda qurl, browser=browser: self.update_urlbar(qurl, browser))  # создание сигнала
+        # на изменение адреса при переключении вкладок
+        browser.loadFinished.connect(lambda _, i=i, browser=browser: self.tabs.setTabText(i, browser.page().title()))
+        # создание сигнала завершения загрузки странички с привязкой встроенного слота, извлекающего название странички
+        # и устанавливающего его в качестве наименования вкладки
 
     def tab_open_doubleclick(self, i) -> None:
         """
