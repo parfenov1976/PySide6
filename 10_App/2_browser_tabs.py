@@ -77,6 +77,8 @@ class MainWindow(QMainWindow):
         # с привязкой метода слота, удаляющего вкладку
         self.setCentralWidget(self.tabs)  # размещение вкладки в главном окне приложения
 
+        self.setContextMenuPolicy(Qt.NoContextMenu)  # запрет на вызов контекстного меню
+
         navtb = QToolBar('Navigation')  # создание экземпляра класса панели инструментов
         navtb.setIconSize(QSize(16, 16))  # установка размеров места для иконок
         navtb.setMovable(False)  # закрепить панель инструментов
@@ -216,6 +218,7 @@ class MainWindow(QMainWindow):
         if qurl is None:  # проверка наличия адреса веб странички в переданных аргументах
             qurl = QUrl('')  # установка пустой строки в качестве адреса на чала просмотра
         browser = QWebEngineView()  # создание объекта представления веб странички
+        # browser.setContextMenuPolicy(Qt.NoContextMenu)  # запрет на вызов контекстного меню
         browser.setUrl(qurl)  # указание адреса странички для представления
         i = self.tabs.addTab(browser, label)  # добавление вкладки с отображением веб странички
         # и сохранение в переменную i индекса вкладки, возвращенного методом добавления вкладки
