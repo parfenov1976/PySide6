@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (QApplication,
                                QLabel,
                                QFileDialog,
                                QTabWidget,
+                               QMenu,
                                )
 from PySide6.QtGui import QAction, QIcon, QPixmap
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter
@@ -42,7 +43,8 @@ from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 класса основного окна QMainWindow, класса виджета панели инструментов QToolBar, класс виджета диалогового окна QDialog,
 класса кнопок для диалогового окна QDialogButtonBox, класс слоя для виджетов с вертикальной организацией QVBoxLayout,
 класса виджета однострочного редактируемого текстового поля QLineEdit, класс виджета ярлыка QLabel,
-класс диалоговых окон для работы с файлами QFileDialog, класс виджета вкладок QTabWidget.
+класс диалоговых окон для работы с файлами QFileDialog, класс виджета вкладок QTabWidget, класс виджета
+всплывающих меню QMenu
 
 Модуль PySide6.QtGui предоставляет классы для интеграции оконной и графической системы, обработчика событий.
 Импорт из модуля PySide6.QtGui класса абстракций пользовательских команд QAction, класса для работы и иконками QIcon,
@@ -217,8 +219,7 @@ class MainWindow(QMainWindow):
         """
         if qurl is None:  # проверка наличия адреса веб странички в переданных аргументах
             qurl = QUrl('')  # установка пустой строки в качестве адреса на чала просмотра
-        browser = QWebEngineView()  # создание объекта представления веб странички
-        # browser.setContextMenuPolicy(Qt.NoContextMenu)  # запрет на вызов контекстного меню
+        browser = WebTab(self)  # создание объекта представления веб странички с передачей ссылки на родительский объект
         browser.setUrl(qurl)  # указание адреса странички для представления
         i = self.tabs.addTab(browser, label)  # добавление вкладки с отображением веб странички
         # и сохранение в переменную i индекса вкладки, возвращенного методом добавления вкладки
@@ -395,6 +396,35 @@ class MainWindow(QMainWindow):
         """
         dlg = AboutDialog()  # создание экземпляра класса диалогового окна сведений о браузере
         dlg.exec()  # запуск цикла событий диалогового окна
+
+
+class WebTab(QWebEngineView):
+    """
+    Подкласс представления странички для вкладки от супер класса представления веб страничек
+    """
+
+    def __init__(self, parent: MainWindow) -> None:
+        """
+        Конструктор представления веб странички для вкладки
+        :param parent:  ссылка на родительский класс
+        """
+        QWebEngineView.__init__(self)  # явный вызов конструктора родительского класса
+        self.parent = parent  # сохранение ссылки на родительский объект
+
+    def contextMenuEvent(self, event) -> None:
+        """
+        Метод обработчик событий вызова контекстного меню.
+        :param event: PySide6.QtGui.QContextMenuEvent
+        :return: None
+        """
+        qurl = self.lastContextMenuRequest().linkUrl()  # извлечение ссылки из события вызова контекстного меню
+        context_menu = QMenu(self)  # создание экземпляра класса контекстного меню
+        open_in_new_tab = QAction('Open in new tab', self)  # создание объекта команды для контекстного меню
+        open_in_new_tab.triggered.connect(lambda: self.parent.add_new_tab(qurl))  # создание сигнала на вызов пункта
+        # меню с привязкой слота
+        context_menu.addAction(open_in_new_tab)  # добавление объекта команды в контекстное меню
+        context_menu.exec(event.globalPos())  # Запуск цикла событий контекстного меню. Метод .globalPos() обеспечивает
+        # появление контекстного меню на месте курсора
 
 
 class AboutDialog(QDialog):
