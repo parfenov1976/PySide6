@@ -150,36 +150,36 @@ class MainWindow(QMainWindow):
 
         file_menu = self.menuBar().addMenu('&File')  # создание меню Файл
 
-        new_tab_action = QAction(QIcon(os.path.join('icons', 'ui-tab--plus.png')), 'New Tab', self)  # создание
-        # объекта инструмента с кнопкой создать новую вкладку с указанием имени инструмента (в данном случае, для меню,
-        # отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано с вертикальной
-        # организацией пунктов меню)
+        new_tab_action = QAction(QIcon(os.path.join('icons', 'ui-tab--plus.png')), 'New Tab', self, shortcut='Ctrl+T')
+        # создание объекта инструмента с кнопкой создать новую вкладку с указанием имени инструмента (в данном случае,
+        # для меню, отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано
+        # с вертикальной организацией пунктов меню)
         new_tab_action.setStatusTip('Open a New Tab')  # установка текста подсказки для отображения в строке состояния
         new_tab_action.triggered.connect(self.add_new_tab)  # создание сигнала на кнопку создания новой вкладки
         # с привязкой метода слота
         file_menu.addAction(new_tab_action)  # добавление инструмента в меню Файл
 
-        open_file_action = QAction(QIcon(os.path.join('icons', 'disk--arrow.png')), 'Open file...', self)  # создание
-        # объекта инструмента с кнопкой открыть файл с указанием имени инструмента (в данном случае, для меню,
-        # отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано с вертикальной
-        # организацией пунктов меню)
+        open_file_action = QAction(QIcon(os.path.join('icons', 'disk--arrow.png')), 'Open file...', self,
+                                   shortcut='Ctrl+O')  # создание объекта инструмента с кнопкой открыть файл
+        # с указанием имени инструмента (в данном случае, для меню, отображается как строка после иконки,
+        # а не как подсказка в облачке. Вероятно это связано с вертикальной организацией пунктов меню)
         open_file_action.setStatusTip('Open from file')  # установка текста подсказки для отображения в строке состояния
         open_file_action.triggered.connect(self.open_file)  # создание сигнала на кнопку открытия файла
         # с привязкой метода слота
         file_menu.addAction(open_file_action)  # добавление инструмента в меню Файл
 
-        save_file_action = QAction(QIcon(os.path.join('icons', 'disk--pencil.png')), 'Save Page As...', self)
-        # создание объекта инструмента с кнопкой сохранить в файл с указанием имени инструмента (в данном случае,
-        # для меню, отображается как строка после иконки, а не как подсказка в облачке. Вероятно это связано
-        # с вертикальной организацией пунктов меню)
+        save_file_action = QAction(QIcon(os.path.join('icons', 'disk--pencil.png')), 'Save Page As...', self,
+                                   shortcut='Ctrl+Shift+S')  # создание объекта инструмента с кнопкой сохранить в файл
+        # с указанием имени инструмента (в данном случае, для меню, отображается как строка после иконки,
+        # а не как подсказка в облачке. Вероятно это связано с вертикальной организацией пунктов меню)
         save_file_action.setStatusTip('Save current page to file')  # установка текста подсказки для отображения
         # в строке состояния
         save_file_action.triggered.connect(self.save_file)  # создание сигнала на кнопку открытия сохранения в файл
         # с привязкой метода слота
         file_menu.addAction(save_file_action)  # добавление инструмента в меню Файл
 
-        print_action = QAction(QIcon(os.path.join('icons', 'printer.png')), 'Print...', self)  # создание объекта
-        # инструмента с кнопкой печати текущей странички
+        print_action = QAction(QIcon(os.path.join('icons', 'printer.png')), 'Print...', self, shortcut='Ctrl+P')
+        # создание объекта инструмента с кнопкой печати текущей странички
         print_action.setStatusTip('Print current page')  # указание текста подсказки для отображения в строке состояния
         print_action.triggered.connect(self.print_page)  # создание сигнала на нажатие кнопки печати с привязкой
         # метода слота
@@ -425,6 +425,18 @@ class WebTab(QWebEngineView):
         context_menu.addAction(open_in_new_tab)  # добавление объекта команды в контекстное меню
         context_menu.exec(event.globalPos())  # Запуск цикла событий контекстного меню. Метод .globalPos() обеспечивает
         # появление контекстного меню на месте курсора
+
+    # FIXME - добиться работоспособности (открытие ссылки на новой вкладке по Ctrl+LBM)
+    # этот вариант не перехватывает событие мыши в данной ситуации
+    def mousePressEvent(self, event) -> None:
+        """
+        Метод обработчик событий PySide6.QtGui.QMouseEvent, отрабатывающий нажатие кнопки мыши
+        :param: event - QWidget.mousePressEvent - событие специального обработчика событий мыши
+        :return: None
+        """
+        print('000')
+        if event.button() == Qt.LeftButton and event.modifiers()==Qt.ControlModifier:
+            print('111')
 
 
 class AboutDialog(QDialog):
