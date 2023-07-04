@@ -56,7 +56,8 @@ STATUS_ICONS = {STATUS_READY: Paths.icon('plus.png'),
                 STATUS_FAILED: Paths.icon('cross.png'),
                 STATUS_SUCCESS: Paths.icon('smile_lol.png')}
 
-# список кортежей с уровнями сложности и размерами поля
+# список кортежей с уровнями сложности и размерами поля с количеством пришельцев
+# (сложность, размер поля, количество пришельцев)
 LEVELS = [('Easy', 8, 10), ('Medium', 16, 40), ('Hard', 24, 99)]
 
 # TODO: продолжить здесь
