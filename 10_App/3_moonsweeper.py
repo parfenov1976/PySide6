@@ -8,11 +8,19 @@ import time
 from paths import Paths  # импорт класса настроек путей к ресурсам приложения
 
 from PySide6.QtWidgets import (QApplication,
+                               QWidget,
+                               QMainWindow,
+                               QGridLayout,
+                               QVBoxLayout,
+                               QHBoxLayout,
+                               QLayout,
                                )
 
 from PySide6.QtGui import (QImage,
                            QColor,
                            )
+
+from PySide6.QtCore import QTimer
 
 """
 Импорт модуля для работы со случайностями (величины, выбор и т.д.) random.
@@ -22,9 +30,14 @@ from PySide6.QtGui import (QImage,
 в качестве аргумента передается пустой 
 Импорт модуля time для работы величинами времени.
 
-Импорт из модуля PySide6.QWidgets класса управления приложением QApplication,
+Импорт из модуля PySide6.QWidgets класса управления приложением QApplication, класса базового виджета QWidget,
+класса главных окон QMainWindow,  
+класса слоя с организацией по сетке QGridLayout, класса слоя с вертикальной организацией QVBoxLayout,
+класса слоя с горизонтальной организацией QHBoxLayout, класса базового менеджера геометрии слоев QLayout,
 
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
+
+Импорт из модуля PySide6.QtCore класса таймера QTimer,
 
 """
 
@@ -60,7 +73,57 @@ STATUS_ICONS = {STATUS_READY: Paths.icon('plus.png'),
 # (сложность, размер поля, количество пришельцев)
 LEVELS = [('Easy', 8, 10), ('Medium', 16, 40), ('Hard', 24, 99)]
 
-# TODO: продолжить здесь
+
+class Pos(QWidget):
+    pass
+
+
+class MainWindow(QMainWindow):
+    """
+    Подкласс главного окна приложения от класса главных окон
+    """
+
+    def __init__(self):
+        """
+        Конструктор главного окна приложения
+        """
+        QMainWindow.__init__(self)  # явный вызов конструктора родительского класса
+        w = QWidget()  # создание игрового поля
+        hb = QHBoxLayout()  # создание горизонтальной панели
+        hb.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированного размера горизонтальной панели
+        self._timer = QTimer()  # создание таймера игры
+        self._timer.timeout.connect(self.update_timer)  # создание сигнала на истечение таймера с привязкой
+        # метода обновления таймера
+        self._timer.start(1000)  # запуск таймера на 1000 мсек = 1 сек
+
+
+        self.grid = QGridLayout()  # создание сетки игрового поля
+        self.grid.setSpacing(5)  # установка расстояния между ячейками сетки
+        self.grid.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированного размера сетки
+
+    def set_level(self, level):
+        self.level_name, self.b_size, self.n_mines = LEVELS[level]
+        self.setWindowTitle(f'Moonsweeper - {self.level_name}')
+        self.mines.setText(f'{self.n_mines:03d}')
+        self.clear_map()  # вызов метода для очистки карты
+        self.init_map()  # вызов метода для инициализации карты
+        self.reset_map()  # вызов метода для перезагрузки параметров игры
+
+    def clear_map(self):
+        # todo
+        pass
+
+    def init_map(self):
+        # todo
+        pass
+
+    def reset_map(self):
+        # todo
+        pass
+
+    def update_timer(self):
+        # TODO
+        pass
 
 
 if __name__ == '__main__':
