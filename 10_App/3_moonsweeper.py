@@ -109,13 +109,35 @@ class MainWindow(QMainWindow):
         self.init_map()  # вызов метода для инициализации карты
         self.reset_map()  # вызов метода для перезагрузки параметров игры
 
-    def clear_map(self):
-        # todo
-        pass
+    def clear_map(self) -> None:
+        """
+        Метод удаления ячеек игрового поля с карты. Размер карты для всех случаев принимаем максимальный
+        :return: None
+        """
+        # цикл очистки игрового поля
+        for x in range(0, LEVELS[-1][1]):  # проход по горизонтали
+            for y in range(0, LEVELS[-1][1]):  # проход по вертикали
+                c = self.grid.itemAtPosition(y, x)  # выбор объекта в сетке по координатам
+                if c:  # проверка наличия объекта в сетке
+                    c.widget().close()  # подача сигнала на закрытие выбранного виджета ячейки
+                    self.grid.removeItem(c)  # удаление выбранного виджета из сетки
 
-    def init_map(self):
-        # todo
-        pass
+    def init_map(self) -> None:
+        """
+        Метод инициализации игровой карты
+        :return: None
+        """
+        # цикл создания ячеек игрового поля
+        for x in range(0, self.b_size):  # проход по горизонтали
+            for y in range(0, self.b_size):  # проход по вертикали
+                w = Pos(x, y)  # создание экземпляра класса виджета ячейки игрового поля
+                self.grid.addWidget(w, x, y)  # добавление виджета ячейки игрового поля в сетку слоя для виджетов
+                w.clicked.connect(self.tirgger_start)  # создание сигнала на нажатие на ячейку игрового поля
+                w.revealed.connect(self.on_reveal)  # сигнал на открытие нажатой ячейки
+                w.expandable.connect(self.expand_reveal)  # сигнал на расширение раскрытия свободных ячеек
+                # вокруг нажатой
+        QTimer.singleShot(0, lambda: self.resize(1, 1))  # помещает изменение размера в очередь, возвращая управление
+        # Qt до выполнения изменения размера
 
     def reset_map(self):
         # todo
