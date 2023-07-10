@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         # метода обновления таймера
         self._timer.start(1000)  # запуск таймера на 1000 мсек = 1 сек
 
-
+        # todo
         self.grid = QGridLayout()  # создание сетки игрового поля
         self.grid.setSpacing(5)  # установка расстояния между ячейками сетки
         self.grid.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированного размера сетки
@@ -139,7 +139,46 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(0, lambda: self.resize(1, 1))  # помещает изменение размера в очередь, возвращая управление
         # Qt до выполнения изменения размера
 
-    def reset_map(self):
+    def reset_map(self) -> None:
+        """
+        Методы вызова внутриклассовых методов для инициализации и ренинициализации игровой карты
+        :return: None
+        """
+        self._reset_position_data()  # вызов метода для удаления мин и их очистки данных
+        self._reset_add_mines()  # вызов метода для добавления мин на карту
+        self._reset_calculate_adjacency()  # вызов метода для подсчета количества мин рядом с каждой позицией
+        self._reset_add_starting_marker()  # вызов метода добавления маркера старта и запускающего начало исследования
+        self.update_timer()  # вызов метода перезагрузки таймера
+
+    def _reset_position_data(self) -> None:
+        """
+        Внутренний метод для удаления мин и очистки их данных
+        :return: None
+        """
+        for x in range(0, self.b_size):  # проход по горизонтали
+            for y in range(0, self.b_size):  # проход по вертикали
+                w = self.grid.itemAtPosition(y, x).widget()  # выбирает ячейку сетки слоя и возвращает
+                # находящийся в ней виджет
+                w.reset()  # вызов метода ячейки игрового поля для перезагрузки виджета к исходному состоянию
+
+    def _reset_add_mines(self) -> list:
+        """
+        Внутренний метод для расстановки мин на игровом поле
+        :return: list - список заминированных ячеек
+        """
+        positions = []  # создание списка для хранения позиций мин
+        while len(positions) < self.n_mines:  # цикл по условию заполнения списка мин
+            x, y = (random.randint(0, self.b_size - 1),  # случайный выбор ячейки игрового поля
+                    random.randint(0, self.b_size - 1)
+                    )
+            if (x, y) not in positions:  # проверка условия нахождения позиции в списке мин
+                w = self.grid.itemAtPosition(y, x).widget()  # выбор ячейки и возврат виджета, размещенного в ней
+                w.is_mine = True  # размещение мины в ячейке
+                positions.append((x, y))  # добавление заминированной ячейки в список мин
+                self.end_game_n = (self.b_size * self.b_size) - (self.n_mines + 1)  # расчет условия завершения игры
+        return positions
+
+    def _reset_calculate_adjacency(self) -> int:
         # todo
         pass
 
