@@ -20,7 +20,7 @@ from PySide6.QtGui import (QImage,
                            QColor,
                            )
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Signal, QSize
 
 """
 Импорт модуля для работы со случайностями (величины, выбор и т.д.) random.
@@ -37,7 +37,7 @@ from PySide6.QtCore import QTimer
 
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
 
-Импорт из модуля PySide6.QtCore класса таймера QTimer,
+Импорт из модуля PySide6.QtCore класса таймера QTimer, класс сигналов Signal, класс размеров QSize
 
 """
 
@@ -75,7 +75,33 @@ LEVELS = [('Easy', 8, 10), ('Medium', 16, 40), ('Hard', 24, 99)]
 
 
 class Pos(QWidget):
-    pass
+    expandable = Signal(int, int)  # создание объекта сигнала расширения вскрытой области
+    revealed = Signal(object)  # создание объекта сигнала вскрытия ячейки
+    clicked = Signal()  # создание объекта сигнала клика по ячейки
+
+    def __init__(self, x, y) -> None:
+        """
+        Конструктор ячейки игрового поля
+        :param x: int - координата ячейки по горизонтали
+        :param y: int - координата ячейки по вертикали
+        """
+        QWidget.__init__(self)  # явный вызов конструктора родительского класса
+        self.setFixedSize(QSize(20, 20))  # установка фиксированного размера виджета ячейки игрового поля
+        self.x = x  # сохранение координаты по горизонтали в атрибут ячейки
+        self.y = y  # сохранение координаты по вертикал в атрибут ячейки
+        self.reset()  # вызов метода сброса состояний ячейки игрового поля к исходным значениям
+
+    def reset(self) -> None:
+        """
+        Метод сброса состояний ячейки игрового поля к исходным значениям
+        :return: None
+        """
+        self.is_start = False  # сброс состояния стартовой точки
+        self.is_mine = False  # сброс состояния мины
+        self.adjacent = 0  # сброс подсчета мин в окружении
+        self.is_revealed = False  # сброс состояния вскрытия ячейки
+        self.is_flagged = False  # сброс флага
+        self.update()  # вызов встроенного метода обновления виджета
 
 
 class MainWindow(QMainWindow):
@@ -178,9 +204,49 @@ class MainWindow(QMainWindow):
                 self.end_game_n = (self.b_size * self.b_size) - (self.n_mines + 1)  # расчет условия завершения игры
         return positions
 
-    def _reset_calculate_adjacency(self) -> int:
-        # todo
-        pass
+    def _reset_calculate_adjacency(self):
+        """
+        Метод подсчета количества мни в окружении позиции
+        :return: None
+        """
+        def get_adjacency(x: int, y: int) -> int:
+            """
+            Внутренний метод подсчета количества мин в окружении позиции
+            :param x: int - координата позиции по горизонтали
+            :param y: int - координата позиции по вертикали
+            :return: int - количество мин в окружении позиции
+            """
+            positions = self.get_surrounding(x, y)  # вызов метода, возвращающего координаты окружающих позиций
+            return sum(1 for w in positions if w.is_mine)  # подсчет количества мин в окружении
+        for x in range(0, self.b_size):  # проход по ячейкам игрового поля по горизонтали
+            for y in range(0, self.b_size):  # проход по ячейкам игрового поля по вертикали
+                w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на виджет ячейки игрового поля из
+                # сетки слоя по координатам
+                w.adjacent_n = get_adjacency(x, y)  # запись в игровую ячейку количество мин в ее окружении
+
+    def _reset_add_starting_marker(self) -> None:
+        """
+        Метод для установки стартовой позиции исследования игрового поля
+        :return: None
+        """
+        self.update_status(STATUS_READY)  # установка начального статуса
+        while True:  # цикл случайного выбора стартовой позиции
+            x, y = (random.randint(0, self.b_size - 1),  # генерация случайной координаты по горизонтали
+                    random.randint(0, self.b_size - 1)   # генерация случайной координаты по вертикали
+                    )
+            w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на виджет ячейки игрового поля
+            # из сетки слоя
+            if not w.is_mine:  # проверка наличия мины
+                w.is_start = True  # установка стартовой позиции
+                w.is_revealed = True  # вскрытие ячейки старковой позиции
+                w.update()  # вызов встроенного метода обновления виджета
+                for w in self.get_surroundig(x, y):  # получение координат окружения и проход по ним
+                    if not w.is_mine:  # проверка наличия мины в ячейках окружения
+                        w.click()  # вызов метода, как бы кликающего по виджету
+                break  # выход из цикла
+        self.update_status(STATUS_READY)  # установка статуса готовности к клику по полую
+
+    # TODO
 
     def update_timer(self):
         # TODO
