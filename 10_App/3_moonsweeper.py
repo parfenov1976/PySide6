@@ -20,7 +20,7 @@ from PySide6.QtGui import (QImage,
                            QColor,
                            )
 
-from PySide6.QtCore import QTimer, Signal, QSize
+from PySide6.QtCore import QTimer, Signal, QSize, Qt
 
 """
 Импорт модуля для работы со случайностями (величины, выбор и т.д.) random.
@@ -36,6 +36,7 @@ from PySide6.QtCore import QTimer, Signal, QSize
 класса слоя с горизонтальной организацией QHBoxLayout, класса базового менеджера геометрии слоев QLayout,
 
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
+класса пространства имен различных идентификаторов Qt, 
 
 Импорт из модуля PySide6.QtCore класса таймера QTimer, класс сигналов Signal, класс размеров QSize
 
@@ -103,6 +104,59 @@ class Pos(QWidget):
         self.is_flagged = False  # сброс флага
         self.update()  # вызов встроенного метода обновления виджета
 
+    def paintEvent(self, event) -> None:
+        """
+
+        :param event: PySide6.QtGui.QPaintEvent
+        :return: None
+        """
+        # TODO
+
+    def mouseReleaseEvent(self, event) -> None:
+        """
+        Метод обработки отпускания кнопки мыши
+        :param event: PySide6.QtGui.QMouseEvent
+        :return: None
+        """
+        if event.button() == Qt.RightButton and not self.is_revealed:  # проверка правой кнопки мыши и статуса ячейки
+            self.toggle_flag()  # вызов метода, переключающего состояние флага ячейки, который предотвращает
+            # случайное вскрытие ячейки при установке на True
+        elif event.button == Qt.LeftButton:  # проверка левой кнопки мыши
+            if not self.is_flagged and not self.is_revealed:  # проверка статуса ячейки, если ячейка не помечена флагом
+                # и не открыта
+                self.click()  # вызов метода клика по ячейке
+
+    def toggle_flag(self) -> None:
+        """
+        Метод переключающий состояния флага ячейки
+        :return: None
+        """
+        self.if_flagged = not self.is_flagged  # смена статуса флага на противоположный
+        self.update()  # вызов метода перерисовки виджета
+        self.clicked.emit()  # передача сигнала о том, что ячейка была нажата
+
+    def click(self) -> None:
+        """
+        Метод, отрабатывающий нажатие на ячейку
+        :return: None
+        """
+        self.reveal()  # вызов метода вскрытия ячейки
+        if self.adjacent_n == 0:  # проверка наличия мин в окружении нажатой ячейки
+            self.expandable.emit(self.x, self.y)  # передача сигнала на открытие прилегающей области, свободной от мин
+        self.clicked.emit()  # передача сигнала о том, что ячейка была нажата
+
+    def reveal(self, emit=True) -> None:
+        """
+        Метод, ставящий статус ячейки как открытой
+        :param emit: bool флаг разрешения на передачу сигнала о вскрытии ячейки
+        :return: None
+        """
+        if not self.is_revealed:  # проверка статуса открытости ячейки
+            self.is_revealed = True  # установка статуса открытости ячейки
+            self.update()  # вызов метода перерисовки виджета ячейки
+            if emit:  # проверка разрешения на передачу сигнала
+                self.revealed.emit(self)  # передача сигнала о вскрытии ячейки
+
 
 class MainWindow(QMainWindow):
     """
@@ -160,7 +214,7 @@ class MainWindow(QMainWindow):
                 self.grid.addWidget(w, x, y)  # добавление виджета ячейки игрового поля в сетку слоя для виджетов
                 w.clicked.connect(self.tirgger_start)  # создание сигнала на нажатие на ячейку игрового поля
                 w.revealed.connect(self.on_reveal)  # сигнал на открытие нажатой ячейки
-                w.expandable.connect(self.expand_reveal)  # сигнал на расширение раскрытия свободных ячеек
+                w.expandable.connect(self.expand_reveal)  # сигнал на расширение раскрытия свободных от мин ячеек
                 # вокруг нажатой
         QTimer.singleShot(0, lambda: self.resize(1, 1))  # помещает изменение размера в очередь, возвращая управление
         # Qt до выполнения изменения размера
