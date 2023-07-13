@@ -18,6 +18,10 @@ from PySide6.QtWidgets import (QApplication,
 
 from PySide6.QtGui import (QImage,
                            QColor,
+                           QPainter,
+                           QPixmap,
+                           QPen,
+                           QBrush,
                            )
 
 from PySide6.QtCore import QTimer, Signal, QSize, Qt
@@ -36,7 +40,9 @@ from PySide6.QtCore import QTimer, Signal, QSize, Qt
 класса слоя с горизонтальной организацией QHBoxLayout, класса базового менеджера геометрии слоев QLayout,
 
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
-класса пространства имен различных идентификаторов Qt, 
+класса пространства имен различных идентификаторов Qt, класса низкоуровневого рисования на виджетах
+и других устройствах рисования QPainter, класса представления изображения QPixmap, класса настроек пера
+рисовальщика QPen, класса настроек кисти QBrush, 
 
 Импорт из модуля PySide6.QtCore класса таймера QTimer, класс сигналов Signal, класс размеров QSize
 
@@ -99,18 +105,41 @@ class Pos(QWidget):
         """
         self.is_start = False  # сброс состояния стартовой точки
         self.is_mine = False  # сброс состояния мины
-        self.adjacent = 0  # сброс подсчета мин в окружении
+        self.adjacent_n = 0  # сброс подсчета мин в окружении
         self.is_revealed = False  # сброс состояния вскрытия ячейки
         self.is_flagged = False  # сброс флага
         self.update()  # вызов встроенного метода обновления виджета
 
     def paintEvent(self, event) -> None:
         """
-
+        Метод обработчик событий отрисовки виджетов, вызываемый при перерисовке или обновлении виджетов
         :param event: PySide6.QtGui.QPaintEvent
         :return: None
         """
-        # TODO
+        p = QPainter(self)  # создание экземпляра класса рисовальщика
+        p.setRenderHint(QPainter.Antialiasing)  # установка настройки рендеринга для рисовальщика
+        r = event.rect()  # извлечение ссылки на прямоугольник для рисования
+        if self.is_revealed:  # проверка вскрыта ли ячейка
+            if self.is_start:  # проверка статуса стартового маркера
+                p.drawPixmap(r, QPixmap(IMG_START))  # рисование на ячейке стартового маркера
+            elif self.is_mine:  # проверка статуса минирования
+                p.drawPixmap(r, QPixmap(IMG_BOMB))  # рисования на ячейке изображения мины
+            elif self.adjacent_n > 0:  # проверка наличия мин в окружении ячейки
+                pen = QPen(NUM_COLORS[self.adjacent_n])  # создание пера для рисовальщика и настройка его цвета
+                p.setPen(pen)  # применение настроек пера к рисовальщику
+                f = p.font()  # извлечение ссылки на настройки шрифта рисовальщика
+                f.setBold(True)  # настройка шрифта рисовальщика
+                p.setFont(f)  # применение настроек шрифта рисовальщика
+                p.drawText(r, Qt.AlignHCenter | Qt.AlignVCenter, str(self.adjacent_n))  # рисование в ячейке надписи
+                # с количеством мин в окружении ячейки
+        else:
+            p.fillRect(r, QBrush(Qt.lightGray))  # заливка ячейки светлосерым цветом
+            pen = QPen(Qt.gray)  # создание пера рисовальщика с установкой цвета
+            pen.setWidth(1)  # установка толщины линии для пера
+            p.setPen(pen)  # применение настроек пера к рисовальщику
+            p.drawRect(r)  # рисование прямоугольника в ячейке по ее контуру
+            if self.is_flagged:  # проверка статуса флага в ячейке
+                p.drawPixmap(r, QPixmap(IMG_FLAG))  # рисование флага в ячейке
 
     def mouseReleaseEvent(self, event) -> None:
         """
