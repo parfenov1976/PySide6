@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (QApplication,
                                QVBoxLayout,
                                QHBoxLayout,
                                QLayout,
+                               QLabel,
+                               QPushButton,
                                )
 
 from PySide6.QtGui import (QImage,
@@ -22,6 +24,8 @@ from PySide6.QtGui import (QImage,
                            QPixmap,
                            QPen,
                            QBrush,
+                           QFont,
+                           QIcon,
                            )
 
 from PySide6.QtCore import QTimer, Signal, QSize, Qt
@@ -35,14 +39,14 @@ from PySide6.QtCore import QTimer, Signal, QSize, Qt
 Импорт модуля time для работы величинами времени.
 
 Импорт из модуля PySide6.QWidgets класса управления приложением QApplication, класса базового виджета QWidget,
-класса главных окон QMainWindow,  
+класса главных окон QMainWindow, класса ярлыка QLabel, класса кнопок QPushButton
 класса слоя с организацией по сетке QGridLayout, класса слоя с вертикальной организацией QVBoxLayout,
 класса слоя с горизонтальной организацией QHBoxLayout, класса базового менеджера геометрии слоев QLayout,
 
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
 класса пространства имен различных идентификаторов Qt, класса низкоуровневого рисования на виджетах
 и других устройствах рисования QPainter, класса представления изображения QPixmap, класса настроек пера
-рисовальщика QPen, класса настроек кисти QBrush, 
+рисовальщика QPen, класса настроек кисти QBrush, класс шрифтов QFont, класса иконок QIcon
 
 Импорт из модуля PySide6.QtCore класса таймера QTimer, класс сигналов Signal, класс размеров QSize
 
@@ -204,11 +208,45 @@ class MainWindow(QMainWindow):
         self._timer.timeout.connect(self.update_timer)  # создание сигнала на истечение таймера с привязкой
         # метода обновления таймера
         self._timer.start(1000)  # запуск таймера на 1000 мсек = 1 сек
-
-        # todo
+        self.mines = QLabel()  # создание ярлыка для отображения количества мин на поле
+        self.mines.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # настройка выравнивание по центру
+        # по вертикали и горизонтали
+        self.clock = QLabel()  # создание ярлыка для отображения часов
+        self.clock.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # настройка выравнивание по центру
+        # по вертикали и горизонтали
+        f = self.mines.font()  # создание настроек для шрифта
+        f.setPointSize(24)  # установка размера шрифта
+        f.setWeight(QFont.Bold)  # установка толщины шрифта
+        self.mines.setFont(f)  # применение настроек шрифта к ярлыку для отображения количества мин на поле
+        self.clock.setFont(f)  # применение настроек шрифта к ярлыку для отображения часов
+        self.clock.setText('000')  # установка начального значения часов
+        self.button = QPushButton()  # создание кнопки для завершения текущей игры
+        self.button.setFixedSize(QSize(32, 32))  # установка фиксированного размера кнопки
+        self.button.setIconSize(QSize(32, 32))  # установка размера иконки, отображающейся на кнопке
+        self.button.setIcon(QIcon(Paths.icon('./icons/smiley.png')))  # размещение на кнопке иконки
+        self.button.setFlat(True)  # сделать кнопку плоской
+        self.button.pressed.connect(self.button_pressed)  # создание сигнала нажатия на кнопку завершения игры
+        # с привязкой слота
+        self.statusBar()  # создание панели статусов в окне приложения
+        l = QLabel()  # создание ярлыка для размещения изображения бомбы
+        l.setPixmap(QPixmap.fromImage(IMG_BOMB))  # установка изображения бомбы
+        l.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # настройка выравнивания изображения по правому краю
+        # и посередине по вертикали
+        hb.addWidget(l)  # добавление изображения мины на горизонтальную панель
+        hb.addWidget(self.mines)  # добавление на горизонтальную панель счетчика мин
+        hb.addWidget(self.button)  # добавление на горизонтальную панель кнопки завершения текущий игры
+        hb.addWidget(self.clock)  # добавление на горизонтальную панель часов
+        l = QLabel()  # создание ярлыка для размещения изображения символа часов
+        l.setPixmap(QPixmap.fromImage(IMG_CLOCK))  # установка изображения часов
+        l.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)  # настройка выравнивания для изображения часов
+        hb.addWidget(l)  # добавление изображения часов на горизонтальную панель
+        vb = QVBoxLayout()  # создание экземпляра слоя с вертикальной организацией виджетов
+        vb.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированных размеров вертикальной панели
+        vb.addLayout(hb)  # добавление горизонтальной панели на вертикальную панель
         self.grid = QGridLayout()  # создание сетки игрового поля
         self.grid.setSpacing(5)  # установка расстояния между ячейками сетки
         self.grid.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированного размера сетки
+        # TODO
 
     def set_level(self, level):
         self.level_name, self.b_size, self.n_mines = LEVELS[level]
@@ -292,6 +330,7 @@ class MainWindow(QMainWindow):
         Метод подсчета количества мни в окружении позиции
         :return: None
         """
+
         def get_adjacency(x: int, y: int) -> int:
             """
             Внутренний метод подсчета количества мин в окружении позиции
@@ -301,6 +340,7 @@ class MainWindow(QMainWindow):
             """
             positions = self.get_surrounding(x, y)  # вызов метода, возвращающего координаты окружающих позиций
             return sum(1 for w in positions if w.is_mine)  # подсчет количества мин в окружении
+
         for x in range(0, self.b_size):  # проход по ячейкам игрового поля по горизонтали
             for y in range(0, self.b_size):  # проход по ячейкам игрового поля по вертикали
                 w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на виджет ячейки игрового поля из
@@ -315,7 +355,7 @@ class MainWindow(QMainWindow):
         self.update_status(STATUS_READY)  # установка начального статуса
         while True:  # цикл случайного выбора стартовой позиции
             x, y = (random.randint(0, self.b_size - 1),  # генерация случайной координаты по горизонтали
-                    random.randint(0, self.b_size - 1)   # генерация случайной координаты по вертикали
+                    random.randint(0, self.b_size - 1)  # генерация случайной координаты по вертикали
                     )
             w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на виджет ячейки игрового поля
             # из сетки слоя
@@ -377,10 +417,38 @@ class MainWindow(QMainWindow):
         for w in to_reveal:  # обход списка ячеек на вскрытие
             w.reveal()  # вызов метода вскрытия ячейки
 
-
     def update_timer(self):
         # TODO
         pass
+
+    def on_reveal(self, w: Pos) -> None:
+        """
+        Метод проверки результатам нажатия на ячейку
+        :param w: экземпляр ячейки игрового поля
+        :return: None
+        """
+        if w.is_mine:  # проверка минирования нажатой ячейки
+            self.game_over()  # вызов метода, завершающего игру с поражением
+        else:
+            self.end_game_n -= 1  # уменьшение количества не заминированных ячеек
+            if self.end_game_n == 0:  # проверка количества не заминированных ячеек, которые еще не открыты
+                self.game_won()  # завершение игры с победой
+
+    def game_over(self) -> None:
+        """
+        Метод для завершения игры с поражением
+        :return: None
+        """
+        self.reveal_map()  # метод для вскрытия всей карты
+        self.update_status(STATUS_FAILED)  # установка статуса игры на поражение
+
+    def game_won(self) -> None:
+        """
+        Метода для завершения игры с победой
+        :return: None
+        """
+        self.reveal_map()  # метод для вскрытия всей карты
+        self.update_status(STATUS_SUCCESS)  # установка статуса игры на победу
 
 
 if __name__ == '__main__':
