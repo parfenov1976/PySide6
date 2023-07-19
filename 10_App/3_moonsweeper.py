@@ -299,7 +299,7 @@ class MainWindow(QMainWindow):
         for x in range(0, self.b_size):  # проход по горизонтали
             for y in range(0, self.b_size):  # проход по вертикали
                 w = Pos(x, y)  # создание экземпляра класса виджета ячейки игрового поля
-                self.grid.addWidget(w, x, y)  # добавление виджета ячейки игрового поля в сетку слоя для виджетов
+                self.grid.addWidget(w, y, x)  # добавление виджета ячейки игрового поля в сетку слоя для виджетов
                 w.clicked.connect(self.trigger_start)  # создание сигнала на нажатие на ячейку игрового поля
                 w.revealed.connect(self.on_reveal)  # сигнал на открытие нажатой ячейки
                 w.expandable.connect(self.expand_reveal)  # сигнал на расширение раскрытия свободных от мин ячеек
@@ -352,7 +352,7 @@ class MainWindow(QMainWindow):
         :return: None
         """
 
-        def get_adjacency(x: int, y: int) -> int:
+        def get_adjacency_n(x: int, y: int) -> int:
             """
             Внутренний метод подсчета количества мин в окружении позиции
             :param x: int - координата позиции по горизонтали
@@ -366,7 +366,7 @@ class MainWindow(QMainWindow):
             for y in range(0, self.b_size):  # проход по ячейкам игрового поля по вертикали
                 w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на виджет ячейки игрового поля из
                 # сетки слоя по координатам
-                w.adjacent_n = get_adjacency(x, y)  # запись в игровую ячейку количество мин в ее окружении
+                w.adjacent_n = get_adjacency_n(x, y)  # запись в игровую ячейку количество мин в ее окружении
 
     def _reset_add_starting_marker(self) -> None:
         """
