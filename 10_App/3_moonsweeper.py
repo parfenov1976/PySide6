@@ -26,6 +26,7 @@ from PySide6.QtGui import (QImage,
                            QBrush,
                            QFont,
                            QIcon,
+                           QAction,
                            )
 
 from PySide6.QtCore import QTimer, Signal, QSize, Qt
@@ -46,7 +47,8 @@ from PySide6.QtCore import QTimer, Signal, QSize, Qt
 Импорт из модуля PySide6.QtGui класса графических изображений QImage, класса представления цветов QColor,
 класса пространства имен различных идентификаторов Qt, класса низкоуровневого рисования на виджетах
 и других устройствах рисования QPainter, класса представления изображения QPixmap, класса настроек пера
-рисовальщика QPen, класса настроек кисти QBrush, класс шрифтов QFont, класса иконок QIcon
+рисовальщика QPen, класса настроек кисти QBrush, класс шрифтов QFont, класса иконок QIcon, абстрактного
+класса пользовательских команд QAction
 
 Импорт из модуля PySide6.QtCore класса таймера QTimer, класс сигналов Signal, класс размеров QSize
 
@@ -70,15 +72,15 @@ NUM_COLORS = {1: QColor('#f44336'),
 
 # глобальные переменные для хранения кодов состояния
 STATUS_READY = 0
-STATUS_PAYING = 1
+STATUS_PLAYING = 1
 STATUS_FAILED = 2
 STATUS_SUCCESS = 3
 
 # словарь с иконками состояний
 STATUS_ICONS = {STATUS_READY: Paths.icon('plus.png'),
-                STATUS_PAYING: Paths.icon('smile.png'),
+                STATUS_PLAYING: Paths.icon('smiley.png'),
                 STATUS_FAILED: Paths.icon('cross.png'),
-                STATUS_SUCCESS: Paths.icon('smile_lol.png')}
+                STATUS_SUCCESS: Paths.icon('smiley-lol.png')}
 
 # список кортежей с уровнями сложности и размерами поля с количеством пришельцев
 # (сложность, размер поля, количество пришельцев)
@@ -154,7 +156,7 @@ class Pos(QWidget):
         if event.button() == Qt.RightButton and not self.is_revealed:  # проверка правой кнопки мыши и статуса ячейки
             self.toggle_flag()  # вызов метода, переключающего состояние флага ячейки, который предотвращает
             # случайное вскрытие ячейки при установке на True
-        elif event.button == Qt.LeftButton:  # проверка левой кнопки мыши
+        elif event.button() == Qt.LeftButton:  # проверка левой кнопки мыши
             if not self.is_flagged and not self.is_revealed:  # проверка статуса ячейки, если ячейка не помечена флагом
                 # и не открыта
                 self.click()  # вызов метода клика по ячейке
@@ -164,7 +166,7 @@ class Pos(QWidget):
         Метод переключающий состояния флага ячейки
         :return: None
         """
-        self.if_flagged = not self.is_flagged  # смена статуса флага на противоположный
+        self.is_flagged = not self.is_flagged  # смена статуса флага на противоположный
         self.update()  # вызов метода перерисовки виджета
         self.clicked.emit()  # передача сигнала о том, что ячейка была нажата
 
@@ -223,7 +225,7 @@ class MainWindow(QMainWindow):
         self.button = QPushButton()  # создание кнопки для завершения текущей игры
         self.button.setFixedSize(QSize(32, 32))  # установка фиксированного размера кнопки
         self.button.setIconSize(QSize(32, 32))  # установка размера иконки, отображающейся на кнопке
-        self.button.setIcon(QIcon(Paths.icon('./icons/smiley.png')))  # размещение на кнопке иконки
+        self.button.setIcon(QIcon(Paths.icon('smiley.png')))  # размещение на кнопке иконки
         self.button.setFlat(True)  # сделать кнопку плоской
         self.button.pressed.connect(self.button_pressed)  # создание сигнала нажатия на кнопку завершения игры
         # с привязкой слота
@@ -246,7 +248,26 @@ class MainWindow(QMainWindow):
         self.grid = QGridLayout()  # создание сетки игрового поля
         self.grid.setSpacing(5)  # установка расстояния между ячейками сетки
         self.grid.setSizeConstraint(QLayout.SetFixedSize)  # установка фиксированного размера сетки
-        # TODO
+        vb.addLayout(self.grid)  # добавление на слой слоя сетки игрового поля
+        w.setLayout(vb)  # добавление слоя с виджетами на виджет игрового поля
+        self.setCentralWidget(w)  # размещение игрового поля в главном окне приложения
+
+        self.menuBar().setNativeMenuBar(False)  # отказ от настроек панели меню, зависящих от платформы
+        game_menu = self.menuBar().addMenu('&Game')  # выпадающего меню
+        new_game_action = QAction('New game', self)  # создание команды на начало новой игры
+        new_game_action.setStatusTip('Start a new game (your current game will be lost)')  # создание подсказки
+        # для отображения в панели статуса
+        new_game_action.triggered.connect(self.reset_map)  # создание сигнала для команды и привязка слота
+        game_menu.addAction(new_game_action)  # размещение команды в выпадающем меню
+        levels = game_menu.addMenu('Levels')  # создание выпадающего меню настроек уровня сложности (размеров)
+        for n, level in enumerate(LEVELS):  # цикл для создания пунктов меню настроек размеров поля
+            level_action = QAction(level[0], self)  # создание команды
+            level_action.setStatusTip(f'{level[1]}x{level[1]} grid, with {level[2]} mines')  # создание подсказки
+            level_action.triggered.connect(lambda checked=None, n=n: self.set_level(n))  # создание сигнала
+            # с привязкой слота
+            levels.addAction(level_action)  # размещение команды в выпадающем меню
+
+        self.set_level(0)  # установка по умолчанию легкого уровня
 
     def set_level(self, level):
         self.level_name, self.b_size, self.n_mines = LEVELS[level]
@@ -279,7 +300,7 @@ class MainWindow(QMainWindow):
             for y in range(0, self.b_size):  # проход по вертикали
                 w = Pos(x, y)  # создание экземпляра класса виджета ячейки игрового поля
                 self.grid.addWidget(w, x, y)  # добавление виджета ячейки игрового поля в сетку слоя для виджетов
-                w.clicked.connect(self.tirgger_start)  # создание сигнала на нажатие на ячейку игрового поля
+                w.clicked.connect(self.trigger_start)  # создание сигнала на нажатие на ячейку игрового поля
                 w.revealed.connect(self.on_reveal)  # сигнал на открытие нажатой ячейки
                 w.expandable.connect(self.expand_reveal)  # сигнал на расширение раскрытия свободных от мин ячеек
                 # вокруг нажатой
@@ -363,9 +384,9 @@ class MainWindow(QMainWindow):
                 w.is_start = True  # установка стартовой позиции
                 w.is_revealed = True  # вскрытие ячейки старковой позиции
                 w.update()  # вызов встроенного метода обновления виджета
-                for w in self.get_surroundig(x, y):  # получение координат окружения и проход по ним
+                for w in self.get_surrounding(x, y):  # получение координат окружения и проход по ним
                     if not w.is_mine:  # проверка наличия мины в ячейках окружения
-                        w.click()  # вызов метода, как бы кликающего по виджету
+                        w.click()  # вызов метода, как бы нажимающего на виджет ячейки игрового поля
                 break  # выход из цикла
         self.update_status(STATUS_READY)  # установка статуса готовности к клику по полую
 
@@ -384,8 +405,25 @@ class MainWindow(QMainWindow):
                     # ячеек окружения в список
         return positions  # возврат списка
 
-    # TODO button_pressed
-    # TODO reveal_map
+    def button_pressed(self) -> None:
+        """
+        Метод слот завершения игры по нажатию кнопки завершения
+        :return: None
+        """
+        if self.status == STATUS_PLAYING:  # проверка статуса игры
+            self.game_over()  # вызов метода завершения игры с поражением
+        elif self.status == STATUS_FAILED or self.status == STATUS_SUCCESS:  # проверка статуса игры
+            self.reset_map()  # вызов метода перезапуска игровой карты
+
+    def reveal_map(self) -> None:
+        """
+        Метод для вскрытия всех ячеек игрового поля
+        :return: None
+        """
+        for x in range(0, self.b_size):  # проход по горизонтали
+            for y in range(0, self.b_size):  # проход по вертикали
+                w = self.grid.itemAtPosition(y, x).widget()  # извлечение ссылки на игровую ячейку по координатам
+                w.reveal(False)  # вызов метода открытия ячейки с запретом на подачу сигнала открытия ячейки
 
     def expand_reveal(self, x: int, y: int) -> None:
         """
@@ -417,9 +455,32 @@ class MainWindow(QMainWindow):
         for w in to_reveal:  # обход списка ячеек на вскрытие
             w.reveal()  # вызов метода вскрытия ячейки
 
-    def update_timer(self):
-        # TODO
-        pass
+    def trigger_start(self) -> None:
+        """
+        Метод для запуска новой игры
+        :return: None
+        """
+        if self.status == STATUS_READY:  # проверка статуса готовности к новой игре
+            self.update_status(STATUS_PLAYING)  # смена статуса на "в игре"
+            self._timer_start_nsecs = int(time.time())  # запуск таймера игры
+
+    def update_status(self, status) -> None:
+        """
+        Метод для обновления статуса игры
+        :param status: статус
+        :return: None
+        """
+        self.status = status  # установка статуса игры
+        self.button.setIcon(QIcon(STATUS_ICONS[self.status]))  # обновление иконки на кнопке завершения игры
+        if status == STATUS_READY:  # проверка статуса готовности к новой игре
+            self.statusBar().showMessage('Ready')  # вывод сообщения о готовности
+
+    def update_timer(self) -> None:
+        if self.status == STATUS_PLAYING:
+            n_secs = int(time.time()) - self._timer_start_nsecs
+            self.clock.setText(f'{n_secs:03d}')
+        elif self.status == STATUS_READY:
+            self.clock.setText(f'{0:03d}')
 
     def on_reveal(self, w: Pos) -> None:
         """
