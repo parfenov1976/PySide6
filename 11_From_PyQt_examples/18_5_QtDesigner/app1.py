@@ -6,7 +6,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QObject
-from PySide6.QtUiTools import QUiLofader
+from PySide6.QtUiTools import QUiLoader
 
 """
 Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
