@@ -27,7 +27,8 @@ from PySide6.QtCore import (QThread,
 класса виджета кнопки QPushButton, класса слоев с вертикальной организацией виджетов QVBoxLayout,
 
 
-Импорт из модуля PySide6.QtCore класса потоков QThread, класса набора аттрибутов и настроек Qt
+Импорт из модуля PySide6.QtCore класса потоков QThread, класса набора аттрибутов и настроек Qt,
+класс сигналов Signal
 """
 
 
