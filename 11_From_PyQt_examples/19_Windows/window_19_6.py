@@ -59,12 +59,12 @@ class MainWindow(QMainWindow):
 class Window(QWidget):
     """
     Класс окна приложения из супер класса базового пустого виджета
-    :param parent: object - ссылка на родительский объект
     """
 
     def __init__(self, parent: QWidget | QMainWindow = None) -> None:
         """
         Конструктор окон приложения
+        :param parent: object - ссылка на родительский объект
         """
         QWidget.__init__(self, parent, Qt.WindowType.Window)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Обычное окно приложения')  # установка заголовка окна
@@ -74,12 +74,12 @@ class Window(QWidget):
 class ModalWindow(QWidget):
     """
     Класс модального окна приложения из супер класса базового пустого виджета
-    :param parent: object - ссылка на родительский объект
     """
 
     def __init__(self, parent: QWidget | QMainWindow) -> None:
         """
         Конструктор окон приложения
+        :param parent: object - ссылка на родительский объект
         """
         QWidget.__init__(self, parent, Qt.WindowType.Window)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Модальное окно')  # установка заголовка окна
