@@ -86,7 +86,7 @@ class ModalWindow(QWidget):
         self.resize(150, 150)  # установка исходного размера окна
         self.parent = parent  # сохранение ссылки на родительский объект
         self.setWindowModality(Qt.WindowModality.WindowModal)  # установка модальности окна, при этом,
-        # элементы управления окном и строка заголовка исчезнут
+        # под MacOS элементы управления окном и строка заголовка исчезнут
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)  # установить аттрибут удаления окна при закрытии
         self.btn_close = QPushButton('Закрыть')  # создание кнопки на закрытие модельного окна
         self.vbox = QVBoxLayout()  # создание слоя для виджетов
