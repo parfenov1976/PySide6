@@ -66,6 +66,20 @@ QWidget.
   если был получен;
 ♦ reason() - возвращает причину установки фокуса. Значение аналогично значению
   параметра <Причина> в методе setFocus().
+Для назначения клавиш быстрого доступа также можно воспользоваться классом QShortcut
+из модуля QtGui. В этом случае назначение клавиши у первого текстового поля будет выглядеть
+так:
+self.lineEdit1 = QtWidgets.QLineEdit()
+self.shc = QtGui.QShortcut(QtGui.QKeySequence.mnemonic("&e"), self)
+self.shc.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
+self.shc.activated.connect(self.line1.setFocus)
+Еще можно использовать класс QAction из модуля QtGui. Назначение клавиши у второго
+текстового поля выглядит следующим образом:
+self.lineEdit2 = QtWidgets.QLineEdit()
+self.act = QtGui.QAction(self)
+self.act.setShortcut(QtGui.QKeySequence.mnemonic("&r"))
+self.act.triggered.connect(self.line2.setFocus)
+self.addAction(self.act)
 """
 import sys
 from PySide6.QtWidgets import (QApplication,
@@ -75,7 +89,11 @@ from PySide6.QtWidgets import (QApplication,
                                QVBoxLayout,
                                QWidget,
                                )
-
+from PySide6.QtGui import (QShortcut,
+                           QKeySequence,
+                           QAction,
+                           )
+from PySide6.QtCore import Qt
 """
 Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
 к аргументам командной строки. Если использование аргументов командной строки не предполагается,
@@ -85,6 +103,11 @@ from PySide6.QtWidgets import (QApplication,
 Импорт из модуля PySide6.QWidgets класса управления приложением QApplication, класса главных окон QMainWindow,
 класс виджета кнопки QPushButton, класс слоя с вертикальной организацией виджетов QVBoxLayout,
 базовый класс пустого виджета QWidget, класс редактируемого однострочного текстового поля QLindeEdit
+
+Импорт из модула PySide6.QtGui класса горячих клавиш QShortcut, класса сочетаний клавиш QKeySequence,
+класса действий QAction
+
+Импорт из модуля PySide6.QtCore класса перечислителя настроек виджетов Qt
 """
 
 
@@ -147,6 +170,15 @@ class MainWindow(QMainWindow):
         self.btn.clicked.connect(self.on_clicked)  # назначение обработчика сигналу на нажатие кнопки
         QMainWindow.setTabOrder(self.line1, self.line2)  # задаем порядок обхода с помощью клавиши <Tab>
         QMainWindow.setTabOrder(self.line2, self.btn)  # задаем порядок обхода с помощью клавиши <Tab>
+
+        self.shc = QShortcut(QKeySequence.mnemonic("&e"), self)  # создание сочетания горячих клавиш <Alt>+<e>
+        self.shc.setContext(Qt.ShortcutContext.WindowShortcut)  # добавление сочетания к контексту окна приложения
+        self.shc.activated.connect(self.line1.setFocus)  # создание сигнала на активацию фокуса и привязка обработчика
+
+        self.act = QAction(self)  # создание экземпляра класса действия
+        self.act.setShortcut(QKeySequence.mnemonic('&r'))  # создание сочетания горячих клавиш <Alt>+<r>
+        self.act.triggered.connect(self.line2.setFocus)  # создание сигнала на активацию фокуса и привязка обработчика
+        self.addAction(self.act)  # добавление действия в экземпляр окна приложения
 
     def on_clicked(self) -> None:
         """
