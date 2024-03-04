@@ -35,10 +35,10 @@
 ♦ setTabOrder(<Компонент 1>, <Компонент 2>) - статический метод, задает последовательность
   смены фокуса при нажатии клавиши <ТаЬ>. В параметре <Компонент 2> указывается
   ссылка на компонент, на который переместится фокус с компонента <Компонент 1>.
-  Вот пример указания цепочки перехода widgetl -> widget2 -> widgetЗ -> widget4:
+  Вот пример указания цепочки перехода widget1 -> widget2 -> widget3 -> widget4:
   QtWidgets.QWidget.setTabOrder(widget1, widget2)
-  QtWidgets.QWidget.setTabOrder(widget2, widgetЗ)
-  QtWidgets.QWidget.setTabOrder(widgetЗ, widget4)
+  QtWidgets.QWidget.setTabOrder(widget2, widget3)
+  QtWidgets.QWidget.setTabOrder(widget3, widget4)
 ♦ setFocusPolicy(<Способ>) - задает способ получения фокуса текущим компонентом
   в виде одного из следующих элементов перечисления FocusPolicy из модуля QtCore.Qt:
     • NoFocus - компонент не может получать фокус;
@@ -90,18 +90,36 @@ from PySide6.QtWidgets import (QApplication,
 
 class MyLineEdit(QLineEdit):
     """
-    Клас кастомного однострочного поля
+    Пользовательский класс однострочного поля от супер класса однострочного редактируемого текстового поля
     """
 
-    def __init__(self, id, parent=None):
+    def __init__(self, id: int, parent=None) -> None:
         """
-        Конструктор кастомного класса однострочного редактируемого текстового поля
-        :param id: int - аттрибут для хранения аттрибута потока
+        Конструктор пользовательского класса однострочного редактируемого текстового поля
+        :param id: int - аттрибут для хранения идентификатора поля
         :param parent: ссылка на родительский объект
         """
         QLineEdit.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.id = id  # аттрибут для хранения идентификатора
-    # TODO доделать класс
+
+    def focusInEvent(self, event: QLineEdit.focusInEvent) -> None:
+        """
+        Обработчик события получения фокуса ввода
+        :param event: QLineEdit.focusInEvent - событие получения фокуса ввода
+        :return: None
+        """
+        print(f'Получен фокус ввода полем {self.id}')
+        QLineEdit.focusInEvent(self, event)  # отправка события далее
+
+    def focusOutEvent(self, event: QLineEdit.focusOutEvent) -> None:
+        """
+        Обработчик события потери фокуса ввода
+        :param event: QLineEdit.focusOutEvent - событие потери фокуса ввода
+        :return: None
+        """
+        print(f'Потерян фокус ввода полем {self.id}')
+        QLineEdit.focusOutEvent(self, event)  # отправка события далее
+
 
 class MainWindow(QMainWindow):
     """
@@ -116,9 +134,26 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Обработка событий клавиатуры')  # установка заголовка главного окна
         self.resize(300, 100)  # установка исходного размера окна
-        self.btn = QPushButton('Установить фокус на поле 2')
-        self.line1 = MyLineEdit(1)
-    # TODO доделать класс
+        self.btn = QPushButton('Установить фокус на поле 2')  # создание виджета кнопки
+        self.line1 = MyLineEdit(1)  # создание экземпляра пользовательского класса однострочного текстового поля
+        self.line2 = MyLineEdit(2)  # создание экземпляра пользовательского класса однострочного текстового поля
+        self.vbox = QVBoxLayout()  # создание слоя для виджетов
+        self.vbox.addWidget(self.btn)  # размещение виджета кнопки в слое для виджетов
+        self.vbox.addWidget(self.line1)  # размещение виджета текстового поля в слое
+        self.vbox.addWidget(self.line2)  # размещение виджета текстового поля в слое
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.vbox)  # размещение в контейнере слоя с виджетами
+        self.setCentralWidget(self.container)  # размещение контейнера со слоями в главном окне приложения
+        self.btn.clicked.connect(self.on_clicked)  # назначение обработчика сигналу на нажатие кнопки
+        QMainWindow.setTabOrder(self.line1, self.line2)  # задаем порядок обхода с помощью клавиши <Tab>
+        QMainWindow.setTabOrder(self.line2, self.btn)  # задаем порядок обхода с помощью клавиши <Tab>
+
+    def on_clicked(self) -> None:
+        """
+        Обработчика сигнала на нажатие кнопки
+        :return: None
+        """
+        self.line2.setFocus()  # установка фокуса на поле 2
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
