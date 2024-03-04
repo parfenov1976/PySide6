@@ -69,13 +69,13 @@ QWidget.
 Для назначения клавиш быстрого доступа также можно воспользоваться классом QShortcut
 из модуля QtGui. В этом случае назначение клавиши у первого текстового поля будет выглядеть
 так:
-self.lineEdit1 = QtWidgets.QLineEdit()
+self.line1 = QtWidgets.QLineEdit()
 self.shc = QtGui.QShortcut(QtGui.QKeySequence.mnemonic("&e"), self)
 self.shc.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
 self.shc.activated.connect(self.line1.setFocus)
 Еще можно использовать класс QAction из модуля QtGui. Назначение клавиши у второго
 текстового поля выглядит следующим образом:
-self.lineEdit2 = QtWidgets.QLineEdit()
+self.line2 = QtWidgets.QLineEdit()
 self.act = QtGui.QAction(self)
 self.act.setShortcut(QtGui.QKeySequence.mnemonic("&r"))
 self.act.triggered.connect(self.line2.setFocus)
