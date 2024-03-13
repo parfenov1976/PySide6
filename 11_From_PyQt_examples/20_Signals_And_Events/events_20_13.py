@@ -1,6 +1,6 @@
 """
 Обработка событий клавиатуры. Назначение клавиш быстрого доступа.
-TODO: проверить под виндой
+
 Клавиша быстрого доступа (или горячая клавиша) - это какая-либо из алфавитно-цифровых
 клавиш, нажатие которой совместно с клавишей-модификатором (обычно <Alt>) устанавливает
 фокус ввода на связанный с ней компонент. Если связанным компонентом является кнопка
@@ -111,9 +111,8 @@ class MyLineEdit(QLineEdit):
         """
         Обработчик события установки фокуса ввода
         """
-        print(self.id)
         if event.type() == QEvent.Type.Shortcut:  # проверка типа события на принадлежность к быстрым клавишам
-            if self.id == event.shortcut_id():  # проверка соответствия идентификатора быстрой клавиши
+            if self.id == event.shortcutId():  # проверка соответствия идентификатора быстрой клавиши
                 self.setFocus(Qt.FocusReason.ShortcutFocusReason)  # установка фокуса ввода на поле
                 return True
         return QLineEdit.event(self, event)  # проброс события далее
@@ -148,7 +147,7 @@ class MainWindow(QMainWindow):
         self.container.setLayout(self.vbox)  # размещение слоя с виджетами в контейнере
         self.setCentralWidget(self.container)  # размещение контейнера с виджетами в главном окне приложения
 
-        self.shc = QShortcut(QKeySequence.mnemonic("&e"), self)  # создание сочетания горячих клавиш <Alt>+<e>
+        self.shc = QShortcut(QKeySequence.mnemonic("&q"), self)  # создание сочетания горячих клавиш <Alt>+<e>
         self.shc.setContext(Qt.ShortcutContext.WindowShortcut)  # добавление сочетания к контексту окна приложения
         self.shc.activated.connect(self.line_edit_1.setFocus)  # создание сигнала на активацию фокуса и
         # привязка обработчика
