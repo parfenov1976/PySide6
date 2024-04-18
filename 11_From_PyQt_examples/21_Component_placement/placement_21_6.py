@@ -115,7 +115,7 @@ from PySide6.QtWidgets import (QMainWindow,
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, класса виджета ярлыка QLabel,
-класса виджета вкладок QTabWin, 
+класса виджета вкладок QTabWidget, 
 """
 
 
