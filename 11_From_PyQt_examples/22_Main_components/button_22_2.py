@@ -72,19 +72,21 @@ qabstractbutton.html):
 ♦ menu() - возвращает ссылку на всплывающее меню или значение None;
 ♦ showMenu() - отображает всплывающее меню. Метод является слотом.
 """
+import os
 from PySide6.QtWidgets import (QMainWindow,
                                QPushButton,
+                               QPlainTextEdit,
                                )
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 
 """
 Импорт из модуля PySide6.QtWidgets класс главного окна QMainWindow, класс кнопки QPushButton
+класса многострочного редактируемого поля для текста QPlainTextEdit
 
-Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
+Импорт из модуля PySide6.QtGui класса иконок QIcon
 """
 
 
-# TODO доделать пример
 class MainWindow(QMainWindow):
     """
     Класс главного окна приложения от супер класса главных окон
@@ -98,6 +100,36 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Кнопка - QPushButton')  # установка заголовка главного окна приложения
         self.resize(300, 300)  # установка исходного размера главного окна
+        self.txt_area = QPlainTextEdit(self)
+        self.txt_area.resize(150, 300)
+        self.txt_area.move(150, 0)
+
+        self.btn_1 = QPushButton('Кнопка 1 - Alt+1', self)
+        self.btn_1.setShortcut('Alt+1')
+        self.btn_1.clicked.connect(self.on_clicked_btn_1)
+
+        self.btn_2 = QPushButton('Кнопка 2', self)
+        self.btn_2.move(0, 35)
+        self.btn_2.pressed.connect(self.on_pressed_btn_2)
+        self.btn_2.released.connect(self.on_released_btn_2)
+
+        self.btn_3 = QPushButton('Кнопка 3', self)
+        self.btn_3.move(0, 70)
+        self.btn_3.setIcon(QIcon(os.path.join('data', 'icon.svg')))
+        self.btn_3.setCheckable(True)
+        self.btn_3.toggled.connect(self.on_toggled_btn_3)
+
+    def on_clicked_btn_1(self):
+        self.txt_area.appendPlainText('Кликнута кнопка 1')
+
+    def on_pressed_btn_2(self):
+        self.txt_area.appendPlainText('Нажата кнопка 2')
+
+    def on_released_btn_2(self):
+        self.txt_area.appendPlainText('Отпущена кнопка 2')
+
+    def on_toggled_btn_3(self, event):
+        self.txt_area.appendPlainText(f'Кнопка 3 {"вкл" if event else "выкл"}')
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
