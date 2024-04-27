@@ -100,9 +100,9 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Кнопка - QPushButton')  # установка заголовка главного окна приложения
         self.resize(300, 300)  # установка исходного размера главного окна
-        self.txt_area = QPlainTextEdit(self)
-        self.txt_area.resize(150, 300)
-        self.txt_area.move(150, 0)
+        self.txt_area = QPlainTextEdit(self)  # создание текстового поля
+        self.txt_area.resize(150, 300)  # установка размера текстового поля
+        self.txt_area.move(150, 0)  # указание смещения текстового поля в окне приложения
 
         self.btn_1 = QPushButton('Кнопка 1 - Alt+1', self)
         self.btn_1.setShortcut('Alt+1')
@@ -119,16 +119,29 @@ class MainWindow(QMainWindow):
         self.btn_3.setCheckable(True)
         self.btn_3.toggled.connect(self.on_toggled_btn_3)
 
-    def on_clicked_btn_1(self):
+    def on_clicked_btn_1(self) -> None:
+        """
+        Обработчик сигнала клика по кнопке
+        """
         self.txt_area.appendPlainText('Кликнута кнопка 1')
 
-    def on_pressed_btn_2(self):
+    def on_pressed_btn_2(self) -> None:
+        """
+        Обработчик сигнала нажатия кнопки
+        """
         self.txt_area.appendPlainText('Нажата кнопка 2')
 
-    def on_released_btn_2(self):
+    def on_released_btn_2(self) -> None:
+        """
+        Обработчик сигнала отпускания ранее нажатой кнопки
+        """
         self.txt_area.appendPlainText('Отпущена кнопка 2')
 
-    def on_toggled_btn_3(self, event):
+    def on_toggled_btn_3(self, event: bool) -> None:
+        """
+        Обработчик сигнала переключения кнопки
+        :param event: bool - событие сигнала
+        """
         self.txt_area.appendPlainText(f'Кнопка 3 {"вкл" if event else "выкл"}')
 
 
