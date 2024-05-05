@@ -128,7 +128,20 @@ https://doc.qt.io/qt-6/qlineedit.html):
 """
 from PySide6.QtWidgets import (QMainWindow,
                                QLineEdit,
+                               QLabel,
+                               QGridLayout,
+                               QPushButton,
+                               QWidget,
                                )
+from PySide6.QtCore import Qt
+
+"""
+Импорт из модуля PySide6.QtWidgets класса главного окна приложения QMainWindow,
+класса однострочного редактируемого текстового поля QLineEdit, класса контейнера-сетки QGridLayout,
+класса виджета ярлыка QLabel, класса виджета кнопки QPushButton, базового класса пустого виджета QWidget
+
+Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
+"""
 
 
 class MainWindow(QMainWindow):
@@ -141,9 +154,49 @@ class MainWindow(QMainWindow):
         Конструктор главного окна приложения
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
-        self.resize(300, 300)  # установка исходного размера окна
+        self.resize(450, 300)  # установка исходного размера окна
         self.setWindowTitle('Поле ввода')  # установка заголовка главного окна приложения
-        # TODO закончить пример
+        self.grid = QGridLayout()  # создание контейнера сетки для размещения виджетов
+
+        self.lbl_1 = QLabel('Текстовое поле обычное')  # создание ярлыка с надписью
+        self.line_edit_1 = QLineEdit('Текст в поле')  # создание редактируемого текстового поля
+        self.line_edit_1.setAlignment(Qt.AlignmentFlag.AlignCenter)  # настройка выравнивания в поле
+        self.lbl_btn = QLabel('Двигать курсор')  # создание ярлыка с надписью
+        self.lbl_btn.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
+        self.btn_left = QPushButton('<<')  # создание кнопки
+        self.btn_right = QPushButton('>>')  # создание кнопки
+        self.line_edit_1.setCursorPosition(len(self.line_edit_1.text()) // 2)  # центровка курсора в поле
+        self.btn_left.clicked.connect(lambda: self.line_edit_1.cursorBackward(True))  # привязка обработчика
+        self.btn_right.clicked.connect(lambda: self.line_edit_1.cursorForward(True))  # привязка обработчика
+
+        self.lbl_2 = QLabel('Текстовое поле для пароля')  # создание ярлыка с надписью
+        self.line_edit_2_1 = QLineEdit()  # создание текстового поля
+        self.line_edit_2_2 = QLineEdit()
+        self.line_edit_2_1.setEchoMode(QLineEdit.EchoMode.Password)  # установка режима отображения вводимого текста
+        self.line_edit_2_1.setPlaceholderText('Введите пароль')  # установка текста подсказки в текстовое поле
+        self.line_edit_2_2.setReadOnly(True)  # установка текстового поля в режим только для чтения
+        self.line_edit_2_1.textEdited.connect(self.text_edited)  # создание сигнала на редактирование текстового поля
+        # и привязка обработчика
+
+        # размещение элементов интерфейса в сетке
+        self.grid.addWidget(self.lbl_1, 0, 0)
+        self.grid.addWidget(self.line_edit_1, 0, 1, 1, 2)
+        self.grid.addWidget(self.btn_left, 1, 0)
+        self.grid.addWidget(self.lbl_btn, 1, 1)
+        self.grid.addWidget(self.btn_right, 1, 2)
+        self.grid.addWidget(self.lbl_2, 2, 0)
+        self.grid.addWidget(self.line_edit_2_1, 2, 1)
+        self.grid.addWidget(self.line_edit_2_2, 2, 2)
+
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.grid)  # размещение сетки в контейнере для слоев
+        self.setCentralWidget(self.container)  # размещение контейнера со слоями в главном окне приложения
+
+    def text_edited(self, new_text: str) -> None:
+        """
+        Обработчик сигнала на редактирование текста в поле
+        """
+        self.line_edit_2_2.setText(new_text)  # размещение текста в текстовом поле
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
