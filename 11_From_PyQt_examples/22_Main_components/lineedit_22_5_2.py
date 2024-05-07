@@ -40,16 +40,12 @@ lineEdit.setInputMask("Дата: 99.В9.9999 г.") # Дата: г.
 from PySide6.QtWidgets import (QMainWindow,
                                QLineEdit,
                                QLabel,
-                               QGridLayout,
-                               QPushButton,
-                               QWidget,
                                )
 from PySide6.QtCore import Qt
 
 """
 Импорт из модуля PySide6.QtWidgets класса главного окна приложения QMainWindow,
-класса однострочного редактируемого текстового поля QLineEdit, класса контейнера-сетки QGridLayout,
-класса виджета ярлыка QLabel, класса виджета кнопки QPushButton, базового класса пустого виджета QWidget
+класса однострочного редактируемого текстового поля QLineEdit, класса виджета ярлыка QLabel
 
 Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
 """
@@ -67,7 +63,6 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.resize(200, 100)  # установка исходного размера окна
         self.setWindowTitle('Поле ввода')  # установка заголовка главного окна приложения
-        self.grid = QGridLayout()  # создание контейнера сетки для размещения виджетов
 
         self.line_edit_1 = QLineEdit(self)  # создание редактируемого текстового поля
         self.line_edit_1.resize(175, 25)  # указание исходного размера поля
