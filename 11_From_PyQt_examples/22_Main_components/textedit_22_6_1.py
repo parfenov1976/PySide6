@@ -118,12 +118,17 @@ from PySide6.QtWidgets import (QMainWindow,
                                QWidget,
                                QLabel,
                                QFrame,
+                               QPushButton,
                                )
 from PySide6.QtCore import Qt
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, 
-класса области редактирования QTextEdit,
+класса области редактирования QTextEdit, класса слоя сетки для виджетов QGridLayout,
+класса пустого базового виджета QWidget, класса виджета ярлыка QLabel,
+класса рамки для виджетов QFrame, класса виджета кнопки QPushButton
+
+Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
 """
 
 
@@ -141,31 +146,50 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Область редактирования')  # установка заголовка главного окна приложения
         self.resize(300, 300)  # установка исходного размера главного окна
         self.text_edit = QTextEdit()  # создание экземпляра класса области ввода
-        self.undo_indicator = QLabel('Undo')
-        self.undo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.undo_indicator.setFrameShape(QFrame.Shape.Box)
-        self.undo_indicator.setStyleSheet('color: grey')
-        self.redo_indicator = QLabel('Redo')
-        self.redo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.redo_indicator.setFrameShape(QFrame.Shape.Box)
-        self.redo_indicator.setStyleSheet('color: grey')
+        self.undo_indicator = QLabel('Undo')  # создание индикатора
+        self.undo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
+        self.undo_indicator.setFrameShape(QFrame.Shape.Box)  # создание рамки
+        self.undo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
+        self.redo_indicator = QLabel('Redo')  # создание индикатора
+        self.redo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
+        self.redo_indicator.setFrameShape(QFrame.Shape.Box)  # создание рамки
+        self.redo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
         self.text_edit.undoAvailable.connect(lambda flag: self.indicator_change(flag, self.undo_indicator))
         self.text_edit.redoAvailable.connect(lambda flag: self.indicator_change(flag, self.redo_indicator))
 
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.text_edit, 0, 0, 1, 2)
+        self.undo_btn = QPushButton('Undo')  # создание кнопки
+        self.undo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
+        self.text_edit.undoAvailable.connect(lambda flag: self.undo_btn.setEnabled(flag))
+        # создание сигнала о доступности операции
+        self.undo_btn.clicked.connect(lambda: self.text_edit.undo())  # привязка обработчика к кнопке
+        self.redo_btn = QPushButton('Redo')  # создание кнопки
+        # создание сигнала о доступности операции
+        self.text_edit.redoAvailable.connect(lambda flag: self.redo_btn.setEnabled(flag))
+        self.redo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
+        self.redo_btn.clicked.connect(lambda: self.text_edit.redo())  # привязка обработчика к кнопке
+
+        self.grid = QGridLayout()  # создание слоя сетки для виджетов
+        self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
         self.grid.addWidget(self.undo_indicator, 1, 0)
         self.grid.addWidget(self.redo_indicator, 1, 1)
-        self.container = QWidget()
-        self.container.setLayout(self.grid)
-        self.setCentralWidget(self.container)
+        self.grid.addWidget(self.undo_btn, 2, 0)
+        self.grid.addWidget(self.redo_btn, 2, 1)
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
+        self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
 
     @staticmethod
-    def indicator_change(flag, indicator):
+    def indicator_change(flag: bool, indicator: QLabel) -> None:
+        """
+        Обработчик сигнала о доступности операции
+        :param flag: флаг доступности операции
+        :param indicator: ссылка на индикатор
+        :return: None
+        """
         if flag:
-            indicator.setStyleSheet('color: black')
+            indicator.setStyleSheet('color: black')  # Изменение отображения индикатора
         else:
-            indicator.setStyleSheet('color: gray')
+            indicator.setStyleSheet('color: gray')  # Изменение отображения индикатора
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
