@@ -125,7 +125,10 @@ from PySide6.QtWidgets import (QMainWindow,
                                QPushButton,
                                )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QColor
+from PySide6.QtGui import (QFont,
+                           QColor,
+                           QTextDocument,
+                           )
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, 
@@ -135,7 +138,8 @@ from PySide6.QtGui import QFont, QColor
 
 Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
 
-Импорт из модуля PySide6.QtGui класса шрифтов QFont, класса цветов QColor
+Импорт из модуля PySide6.QtGui класса шрифтов QFont, класса цветов QColor,
+класса текстового документа QTextDocument
 """
 
 
@@ -153,8 +157,11 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Область редактирования')  # установка заголовка главного окна приложения
         self.resize(300, 300)  # установка исходного размера главного окна
         self.text_edit = QTextEdit()  # создание экземпляра класса области ввода
+        self.document = QTextDocument("Текст текст текст текст текст текст текст текст")
+        self.document.setDefaultFont(QFont('Times New Roman', pointSize=20, weight=2, italic=True))
+        self.text_edit.setDocument(self.document)
 
-        #TODO продолжить
+        # TODO продолжить
 
         self.undo_indicator = QLabel('Undo')  # создание индикатора
         self.undo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
@@ -164,18 +171,8 @@ class MainWindow(QMainWindow):
         self.redo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
         self.redo_indicator.setFrameShape(QFrame.Shape.Box)  # создание рамки
         self.redo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
-        self.text_edit.undoAvailable.connect(lambda flag: self.indicator_change(flag, self.undo_indicator))
-        self.text_edit.redoAvailable.connect(lambda flag: self.indicator_change(flag, self.redo_indicator))
-
-        # указание настроек шрифта
-        self.text_edit.setCurrentFont(QFont('Times New Roman', pointSize=20, weight=2, italic=True))
-        self.text_edit.append(f'{self.text_edit.fontFamily()}')
-        self.text_edit.setFontUnderline(True)  # настройки подчеркивания
-        self.text_edit.append(f'Underline {self.text_edit.fontUnderline()}')
-        self.text_edit.setTextColor(QColor('red'))  # настройки цветка шрифта
-        self.text_edit.append(f'Color {self.text_edit.textColor()}')
-        self.text_edit.setTextBackgroundColor(QColor('blue'))  # настройки цвета фона текста
-        self.text_edit.append(f'BG color {self.text_edit.textBackgroundColor()}')
+        self.document.undoAvailable.connect(lambda flag: self.indicator_change(flag, self.undo_indicator))
+        self.document.redoAvailable.connect(lambda flag: self.indicator_change(flag, self.redo_indicator))
 
         self.wrap_mode_btn = QPushButton('Режим переноса')  # создание кнопки переключения режима переноса
         self.wrap_mode_btn.clicked.connect(self.wrap_mode_change)  # привязка обработчика переключателя режима переноса
@@ -184,18 +181,16 @@ class MainWindow(QMainWindow):
         self.auto_format_btn.clicked.connect(self.auto_format_mode_change)  # привязка обработчика переключателя
         # режима автоформата
 
-        self.text_edit.setCursorWidth(5)  # изменение ширины текстового курсора
-
         self.undo_btn = QPushButton('Undo')  # создание кнопки
         self.undo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
-        self.text_edit.undoAvailable.connect(lambda flag: self.undo_btn.setEnabled(flag))
+        self.document.undoAvailable.connect(lambda flag: self.undo_btn.setEnabled(flag))
         # создание сигнала о доступности операции
-        self.undo_btn.clicked.connect(lambda: self.text_edit.undo())  # привязка обработчика к кнопке
+        self.undo_btn.clicked.connect(lambda: self.document.undo())  # привязка обработчика к кнопке
         self.redo_btn = QPushButton('Redo')  # создание кнопки
         # создание сигнала о доступности операции
-        self.text_edit.redoAvailable.connect(lambda flag: self.redo_btn.setEnabled(flag))
+        self.document.redoAvailable.connect(lambda flag: self.redo_btn.setEnabled(flag))
         self.redo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
-        self.redo_btn.clicked.connect(lambda: self.text_edit.redo())  # привязка обработчика к кнопке
+        self.redo_btn.clicked.connect(lambda: self.document.redo())  # привязка обработчика к кнопке
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
         self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
