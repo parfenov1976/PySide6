@@ -99,7 +99,7 @@ QTextDocument(<Текст>[, parent=None])
   текстовых блоков, заданное целым числом;
 ♦ contentsChange(<Позиция курсора>, <Количество удаленных символов>, <Количество
   добавленных символов>) - генерируется при изменении текста. Все три параметра целочисленные;
-♦ contentsChanged() -генерируется при любом изменении документа;
+♦ contentsChanged() - генерируется при любом изменении документа;
 ♦ cursorPositionChanged(<Курсор QTextCursor>) - генерируется при изменении позиции
   текстового курсора из-за операции редактирования. При простом перемещении текстового
   курсора сигнал не генерируется. Внутри обработчика через параметр доступен объект
@@ -126,7 +126,6 @@ from PySide6.QtWidgets import (QMainWindow,
                                )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (QFont,
-                           QColor,
                            QTextDocument,
                            )
 
@@ -138,8 +137,7 @@ from PySide6.QtGui import (QFont,
 
 Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
 
-Импорт из модуля PySide6.QtGui класса шрифтов QFont, класса цветов QColor,
-класса текстового документа QTextDocument
+Импорт из модуля PySide6.QtGui класса шрифтов QFont, класса текстового документа QTextDocument
 """
 
 
@@ -157,11 +155,20 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Область редактирования')  # установка заголовка главного окна приложения
         self.resize(300, 300)  # установка исходного размера главного окна
         self.text_edit = QTextEdit()  # создание экземпляра класса области ввода
-        self.document = QTextDocument("Текст текст текст текст текст текст текст текст")
-        self.document.setDefaultFont(QFont('Times New Roman', pointSize=20, weight=2, italic=True))
-        self.text_edit.setDocument(self.document)
+        self.document = QTextDocument()  # создание экземпляра документа
+        # если текст подать при создании экземпляра документа, то сигналы на доступность undo/redo
+        # не будут работать корректно
+        with open('textedit.txt', 'r') as t:  # открытие файла на чтение
+            self.document.setPlainText(t.read())  # добавление текста в документ
+        self.document.setDefaultFont(QFont('Times New Roman', pointSize=20, weight=2, italic=True))  # изменение шрифта
+        self.text_edit.setDocument(self.document)  # поместить документ в область редактирования
 
-        # TODO продолжить
+        self.save_btn = QPushButton('Сохранить')  # создать кнопку сохранения
+        self.save_btn.setEnabled(False)  # по умолчанию кнопка не активна
+        self.document.contentsChange.connect(lambda: self.save_btn.setEnabled(True))  # проверка изменений в тексте
+        # и активация кнопки сохранения
+        self.save_btn.clicked.connect(lambda: open('textedit.txt', 'w').write(self.document.toPlainText()))
+        # обработчик сигнала сохранения
 
         self.undo_indicator = QLabel('Undo')  # создание индикатора
         self.undo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
@@ -173,6 +180,8 @@ class MainWindow(QMainWindow):
         self.redo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
         self.document.undoAvailable.connect(lambda flag: self.indicator_change(flag, self.undo_indicator))
         self.document.redoAvailable.connect(lambda flag: self.indicator_change(flag, self.redo_indicator))
+        self.document.contentsChange.connect(lambda: print('Content changed'))  # сигнал на изменения в тексте
+        self.document.undoCommandAdded.connect(lambda: print('Undo added'))  # сигнал на добавление undo в очередь
 
         self.wrap_mode_btn = QPushButton('Режим переноса')  # создание кнопки переключения режима переноса
         self.wrap_mode_btn.clicked.connect(self.wrap_mode_change)  # привязка обработчика переключателя режима переноса
@@ -182,15 +191,15 @@ class MainWindow(QMainWindow):
         # режима автоформата
 
         self.undo_btn = QPushButton('Undo')  # создание кнопки
-        self.undo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
+        self.undo_btn.setEnabled(False)  # установка состояния кнопки по умолчанию
         self.document.undoAvailable.connect(lambda flag: self.undo_btn.setEnabled(flag))
         # создание сигнала о доступности операции
-        self.undo_btn.clicked.connect(lambda: self.document.undo())  # привязка обработчика к кнопке
+        self.undo_btn.clicked.connect(self.document.undo)  # привязка обработчика к кнопке
         self.redo_btn = QPushButton('Redo')  # создание кнопки
         # создание сигнала о доступности операции
         self.document.redoAvailable.connect(lambda flag: self.redo_btn.setEnabled(flag))
-        self.redo_btn.setDisabled(True)  # установка состояния кнопки по умолчанию
-        self.redo_btn.clicked.connect(lambda: self.document.redo())  # привязка обработчика к кнопке
+        self.redo_btn.setEnabled(False)  # установка состояния кнопки по умолчанию
+        self.redo_btn.clicked.connect(self.document.redo)  # привязка обработчика к кнопке
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
         self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
@@ -200,6 +209,7 @@ class MainWindow(QMainWindow):
         self.grid.addWidget(self.redo_btn, 2, 1)
         self.grid.addWidget(self.wrap_mode_btn, 3, 0)
         self.grid.addWidget(self.auto_format_btn, 3, 1)
+        self.grid.addWidget(self.save_btn, 4, 0)
         self.container = QWidget()  # создание контейнера для слоев с виджетами
         self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
         self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
