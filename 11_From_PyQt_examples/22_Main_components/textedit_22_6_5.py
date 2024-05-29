@@ -140,6 +140,7 @@ from PySide6.QtWidgets import (QMainWindow,
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (QFont,
                            QTextDocument,
+                           QTextCursor,
                            )
 
 """
@@ -223,8 +224,12 @@ class MainWindow(QMainWindow):
         self.forward_btn.setEnabled(False)  # по умолчанию кнопка заблокирована
         # сигнал на изменение поля ввода и привязка обработчика для изменения активации кнопки поиска
         self.search_field.textChanged.connect(lambda: self.btn_status_change(self.search_btn, self.search_field))
-        self.search_btn.clicked.connect()
-        # TODO продолжить
+        # todo задокументировать код по курсору
+        self.find_results = []
+        self.cursor_position = 0
+        self.text_cursor = QTextCursor(self.document)
+        self.search_btn.clicked.connect(self.text_search)
+        self.forward_btn.clicked.connect(self.cursor_forward)
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
         self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
@@ -241,6 +246,28 @@ class MainWindow(QMainWindow):
         self.container = QWidget()  # создание контейнера для слоев с виджетами
         self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
         self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
+
+    def text_search(self) -> None:
+        self.find_results.clear()
+        if self.document.find(self.search_field.text()).isNull():
+            pass
+        else:
+            self.find_results.append(self.document.find(self.search_field.text()))
+            while True:
+                self.find_results.append(self.document.find(self.search_field.text(),
+                                                            self.find_results[-1].selectionEnd()))
+                if self.find_results[-1].isNull():
+                    self.find_results.pop()
+                    self.cursor_position = 0
+                    break
+            self.forward_btn.setEnabled(True)
+
+    def cursor_forward(self):
+        if self.cursor_position == len(self.find_results):
+            self.cursor_position = 0
+        self.text_edit.setTextCursor(self.find_results[self.cursor_position])
+        self.cursor_position += 1
+        self.text_edit.setFocus()
 
     @staticmethod
     def btn_status_change(btn: QPushButton, field: QLineEdit) -> None:
