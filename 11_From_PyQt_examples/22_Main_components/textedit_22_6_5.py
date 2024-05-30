@@ -225,11 +225,11 @@ class MainWindow(QMainWindow):
         # сигнал на изменение поля ввода и привязка обработчика для изменения активации кнопки поиска
         self.search_field.textChanged.connect(lambda: self.btn_status_change(self.search_btn, self.search_field))
         # todo задокументировать код по курсору
-        self.find_results = []
-        self.cursor_position = 0
-        self.text_cursor = QTextCursor(self.document)
-        self.search_btn.clicked.connect(self.text_search)
-        self.forward_btn.clicked.connect(self.cursor_forward)
+        self.find_results = []  # создание аттрибута для хранения результатов поиска
+        self.cursor_position = 0  # хранение текущего элемента в результатах поиска
+        self.text_cursor = QTextCursor(self.document)  # создание объекта текстового курсора в документе
+        self.search_btn.clicked.connect(self.text_search)  # привязка обработчика с реализацией поиска
+        self.forward_btn.clicked.connect(self.cursor_forward)  # привязка обработчика с перебором результатов поиска
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
         self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
@@ -248,26 +248,36 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
 
     def text_search(self) -> None:
-        self.find_results.clear()
-        if self.document.find(self.search_field.text()).isNull():
-            pass
+        """
+        Обработчик сигнала нажатия на кнопку поиска с реализаций поиска
+        :return: None
+        """
+        self.find_results.clear()  # очистка результатов поиска
+        if self.document.find(self.search_field.text()).isNull():  # проверка наличия результатов поиска
+            pass  # если результатов нет, то поиск завершается
         else:
-            self.find_results.append(self.document.find(self.search_field.text()))
-            while True:
+            self.find_results.append(self.document.find(self.search_field.text()))  # добавление первого
+            # результата поиска
+            while True:  # цикл поиска с добавлением последующих результатов поиска
                 self.find_results.append(self.document.find(self.search_field.text(),
                                                             self.find_results[-1].selectionEnd()))
-                if self.find_results[-1].isNull():
-                    self.find_results.pop()
-                    self.cursor_position = 0
-                    break
-            self.forward_btn.setEnabled(True)
+                if self.find_results[-1].isNull():  # проверка результативности последнего писка
+                    self.find_results.pop()  # если результаты последнего поиска пустые, то удаляем их из списка
+                    self.cursor_position = 0  # сбрасываем текущую позицию в списке результатов поиска
+                    break  # если результат поиска нулевой, то выходим из цикла
+            self.forward_btn.setEnabled(True)  # если поиска успешен активируем кнопку перебора результатов
 
-    def cursor_forward(self):
-        if self.cursor_position == len(self.find_results):
-            self.cursor_position = 0
-        self.text_edit.setTextCursor(self.find_results[self.cursor_position])
-        self.cursor_position += 1
-        self.text_edit.setFocus()
+    def cursor_forward(self) -> None:
+        """
+        Обработчик сигнала нажатия кнопки для перебора результатов поиска
+        :return: None
+        """
+        if self.cursor_position == len(self.find_results):  # проверка текущей позиции в переборе
+            self.cursor_position = 0  # сброс текущей позиции по достижении конца списка результатов поиска
+        self.text_edit.setTextCursor(self.find_results[self.cursor_position])  # передачи указателя результатов поиска
+        # в область редактирования
+        self.cursor_position += 1  # увеличение счетчика текущей позиции
+        self.text_edit.setFocus()  # установка фокуса ввода на область редактирования
 
     @staticmethod
     def btn_status_change(btn: QPushButton, field: QLineEdit) -> None:
