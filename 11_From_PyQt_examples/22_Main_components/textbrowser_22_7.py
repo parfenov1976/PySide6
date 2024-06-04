@@ -67,7 +67,7 @@ QTextBrowser([parent=None])
   обработчика через параметр доступен интернет-адрес загруженного ресурса в виде
   объекта класса QUrl.
 """
-#TODO переделать в браузер
+# TODO переделать в браузер
 from PySide6.QtWidgets import (QMainWindow,
                                QTextEdit,
                                QGridLayout,
@@ -76,13 +76,9 @@ from PySide6.QtWidgets import (QMainWindow,
                                QFrame,
                                QPushButton,
                                QLineEdit,
+                               QTextBrowser,
                                )
-from PySide6.QtCore import Qt
-from PySide6.QtGui import (QFont,
-                           QTextDocument,
-                           QTextCursor,
-                           )
-
+from PySide6.QtCore import Qt, QUrl
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, 
 класса области редактирования QTextEdit, класса слоя сетки для виджетов QGridLayout,
@@ -91,8 +87,6 @@ from PySide6.QtGui import (QFont,
 класса однострочного редактируемого поля для текста QLineEdit
 
 Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
-
-Импорт из модуля PySide6.QtGui класса шрифтов QFont, класса текстового документа QTextDocument
 """
 
 
@@ -109,161 +103,20 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Область редактирования')  # установка заголовка главного окна приложения
         self.resize(300, 450)  # установка исходного размера главного окна
-        self.text_edit = QTextEdit()  # создание экземпляра класса области ввода
-        self.document = QTextDocument()  # создание экземпляра документа
-        # если текст подать при создании экземпляра документа, то сигналы на доступность undo/redo
-        # не будут работать корректно
-        with open('textedit.txt', 'r', encoding="utf-8") as t:  # открытие файла на чтение
-            self.document.setPlainText(t.read())  # добавление текста в документ
-        self.document.setDefaultFont(QFont('Times New Roman', pointSize=15, weight=2, italic=True))  # изменение шрифта
-        self.text_edit.setDocument(self.document)  # поместить документ в область редактирования
-
-        self.save_btn = QPushButton('Сохранить')  # создать кнопку сохранения
-        self.save_btn.setEnabled(False)  # по умолчанию кнопка не активна
-        self.document.contentsChange.connect(lambda: self.save_btn.setEnabled(True))  # проверка изменений в тексте
-        # и активация кнопки сохранения
-        self.save_btn.clicked.connect(lambda: open('textedit.txt', 'w').write(self.document.toPlainText()))
-        # обработчик сигнала сохранения
-
-        self.undo_indicator = QLabel('Undo')  # создание индикатора
-        self.undo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
-        self.undo_indicator.setFrameShape(QFrame.Shape.Box)  # создание рамки
-        self.undo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
-        self.redo_indicator = QLabel('Redo')  # создание индикатора
-        self.redo_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)  # установка настроек выравнивания
-        self.redo_indicator.setFrameShape(QFrame.Shape.Box)  # создание рамки
-        self.redo_indicator.setStyleSheet('color: grey')  # установка цвета шрифта
-        self.document.undoAvailable.connect(lambda flag: self.indicator_change(flag, self.undo_indicator))
-        self.document.redoAvailable.connect(lambda flag: self.indicator_change(flag, self.redo_indicator))
-        self.document.contentsChange.connect(lambda: print('Content changed'))  # сигнал на изменения в тексте
-        self.document.undoCommandAdded.connect(lambda: print('Undo added'))  # сигнал на добавление undo в очередь
-
-        self.wrap_mode_btn = QPushButton('Режим переноса')  # создание кнопки переключения режима переноса
-        self.wrap_mode_btn.clicked.connect(self.wrap_mode_change)  # привязка обработчика переключателя режима переноса
-
-        self.auto_format_btn = QPushButton('Список (введите *)')  # создание кнопки автоформатирования
-        self.auto_format_btn.clicked.connect(self.auto_format_mode_change)  # привязка обработчика переключателя
-        # режима автоформата
-
-        self.undo_btn = QPushButton('Undo')  # создание кнопки
-        self.undo_btn.setEnabled(False)  # установка состояния кнопки по умолчанию
-        self.document.undoAvailable.connect(lambda flag: self.undo_btn.setEnabled(flag))
-        # создание сигнала о доступности операции
-        self.undo_btn.clicked.connect(self.document.undo)  # привязка обработчика к кнопке
-        self.redo_btn = QPushButton('Redo')  # создание кнопки
-        # создание сигнала о доступности операции
-        self.document.redoAvailable.connect(lambda flag: self.redo_btn.setEnabled(flag))
-        self.redo_btn.setEnabled(False)  # установка состояния кнопки по умолчанию
-        self.redo_btn.clicked.connect(self.document.redo)  # привязка обработчика к кнопке
-
-        self.search_field = QLineEdit()  # создание редактируемого поля для поиска текста
-        self.search_field.setPlaceholderText('Введите текст для поиска')  # установка подсказки
-        self.search_btn = QPushButton('Поиск')  # создание кнопки для поиска
-        self.search_btn.setEnabled(False)  # по умолчанию кнопка заблокирована
-        self.forward_btn = QPushButton('Вперед')  # создание кнопки для перехода к следующей подстроке
-        self.forward_btn.setEnabled(False)  # по умолчанию кнопка заблокирована
-        # сигнал на изменение поля ввода и привязка обработчика для изменения активации кнопки поиска
-        self.search_field.textChanged.connect(lambda: self.btn_status_change(self.search_btn, self.search_field))
-        # todo задокументировать код по курсору
-        self.find_results = []  # создание аттрибута для хранения результатов поиска
-        self.cursor_position = 0  # хранение текущего элемента в результатах поиска
-        self.text_cursor = QTextCursor(self.document)  # создание объекта текстового курсора в документе
-        self.search_btn.clicked.connect(self.text_search)  # привязка обработчика с реализацией поиска
-        self.forward_btn.clicked.connect(self.cursor_forward)  # привязка обработчика с перебором результатов поиска
+        self.text_browser = QTextBrowser()  # создание области текстового браузера
+        self.text_browser.setAcceptRichText(True)
+        self.text_browser.setOpenLinks(True)
+        self.text_browser.setOpenExternalLinks(True)
+        self.adress_line = QLineEdit()
+        self.url = QUrl('https://www.ya.ru')
+        self.text_browser.setSource(self.url)
+        #todo чио-то не работает
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
-        self.grid.addWidget(self.text_edit, 0, 0, 1, 2)  # размещение виджета в сетке
-        self.grid.addWidget(self.undo_indicator, 1, 0)
-        self.grid.addWidget(self.redo_indicator, 1, 1)
-        self.grid.addWidget(self.undo_btn, 2, 0)
-        self.grid.addWidget(self.redo_btn, 2, 1)
-        self.grid.addWidget(self.wrap_mode_btn, 3, 0)
-        self.grid.addWidget(self.auto_format_btn, 3, 1)
-        self.grid.addWidget(self.save_btn, 4, 0)
-        self.grid.addWidget(self.search_field, 5, 0, 1, 2)
-        self.grid.addWidget(self.search_btn, 6, 0)
-        self.grid.addWidget(self.forward_btn, 6, 1)
+        self.grid.addWidget(self.text_browser, 0, 0)
         self.container = QWidget()  # создание контейнера для слоев с виджетами
         self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
         self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
-
-    def text_search(self) -> None:
-        """
-        Обработчик сигнала нажатия на кнопку поиска с реализаций поиска
-        :return: None
-        """
-        self.find_results.clear()  # очистка результатов поиска
-        if self.document.find(self.search_field.text()).isNull():  # проверка наличия результатов поиска
-            pass  # если результатов нет, то поиск завершается
-        else:
-            self.find_results.append(self.document.find(self.search_field.text()))  # добавление первого
-            # результата поиска
-            while True:  # цикл поиска с добавлением последующих результатов поиска
-                self.find_results.append(self.document.find(self.search_field.text(),
-                                                            self.find_results[-1].selectionEnd()))
-                if self.find_results[-1].isNull():  # проверка результативности последнего писка
-                    self.find_results.pop()  # если результаты последнего поиска пустые, то удаляем их из списка
-                    self.cursor_position = 0  # сбрасываем текущую позицию в списке результатов поиска
-                    break  # если результат поиска нулевой, то выходим из цикла
-            self.forward_btn.setEnabled(True)  # если поиска успешен активируем кнопку перебора результатов
-
-    def cursor_forward(self) -> None:
-        """
-        Обработчик сигнала нажатия кнопки для перебора результатов поиска
-        :return: None
-        """
-        if self.cursor_position == len(self.find_results):  # проверка текущей позиции в переборе
-            self.cursor_position = 0  # сброс текущей позиции по достижении конца списка результатов поиска
-        self.text_edit.setTextCursor(self.find_results[self.cursor_position])  # передачи указателя результатов поиска
-        # в область редактирования
-        self.cursor_position += 1  # увеличение счетчика текущей позиции
-        self.text_edit.setFocus()  # установка фокуса ввода на область редактирования
-
-    @staticmethod
-    def btn_status_change(btn: QPushButton, field: QLineEdit) -> None:
-        """
-        Обработчика сигнала на изменение поля ввода текста для поиска и изменения активности кнопки Поиск
-        :param btn:  ссылка на кнопку
-        :param field: ссылка на поле ввода
-        :return: None
-        """
-        if field.text():
-            btn.setEnabled(True)
-        else:
-            btn.setEnabled(False)
-
-    @staticmethod
-    def indicator_change(flag: bool, indicator: QLabel) -> None:
-        """
-        Обработчик сигнала о доступности операции
-        :param flag: флаг доступности операции
-        :param indicator: ссылка на индикатор
-        :return: None
-        """
-        if flag:
-            indicator.setStyleSheet('color: black')  # Изменение отображения индикатора
-        else:
-            indicator.setStyleSheet('color: gray')  # Изменение отображения индикатора
-
-    def wrap_mode_change(self) -> None:
-        """
-        Обработчика сигнала переключения режима переноса
-        """
-        if self.text_edit.lineWrapMode() is QTextEdit.LineWrapMode.NoWrap:  # проверка текущего режима
-            self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)  # установка переноса по ширине области
-        else:
-            self.text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)  # отключение переноса
-        self.text_edit.setFocus()  # возврат фокуса в область после нажатия кнопки
-
-    def auto_format_mode_change(self):
-        """
-        Обработчик сигнала переключения режима автоформатирования
-        """
-        if self.text_edit.autoFormatting() is QTextEdit.AutoFormattingFlag.AutoAll:  # проверка текущего режима
-            self.text_edit.setAutoFormatting(QTextEdit.AutoFormattingFlag.AutoNone)  # отключение автоформата
-        else:
-            self.text_edit.setAutoFormatting(QTextEdit.AutoFormattingFlag.AutoAll)  # включение всех режимов автоформата
-        self.text_edit.setFocus()  # возврат фокуса в область после нажатия кнопки
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
