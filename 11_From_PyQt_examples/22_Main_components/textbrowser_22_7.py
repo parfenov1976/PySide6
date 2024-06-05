@@ -69,24 +69,11 @@ QTextBrowser([parent=None])
 """
 # TODO переделать в браузер
 from PySide6.QtWidgets import (QMainWindow,
-                               QTextEdit,
-                               QGridLayout,
-                               QWidget,
-                               QLabel,
-                               QFrame,
-                               QPushButton,
-                               QLineEdit,
                                QTextBrowser,
                                )
-from PySide6.QtCore import Qt, QUrl
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, 
-класса области редактирования QTextEdit, класса слоя сетки для виджетов QGridLayout,
-класса пустого базового виджета QWidget, класса виджета ярлыка QLabel,
-класса рамки для виджетов QFrame, класса виджета кнопки QPushButton,
-класса однострочного редактируемого поля для текста QLineEdit
-
-Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
+класса текстового браузера QTextBrowser
 """
 
 
@@ -104,19 +91,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Область редактирования')  # установка заголовка главного окна приложения
         self.resize(300, 450)  # установка исходного размера главного окна
         self.text_browser = QTextBrowser()  # создание области текстового браузера
-        self.text_browser.setAcceptRichText(True)
-        self.text_browser.setOpenLinks(True)
-        self.text_browser.setOpenExternalLinks(True)
-        self.adress_line = QLineEdit()
-        self.url = QUrl('https://www.ya.ru')
-        self.text_browser.setSource(self.url)
-        #todo чио-то не работает
-
-        self.grid = QGridLayout()  # создание слоя сетки для виджетов
-        self.grid.addWidget(self.text_browser, 0, 0)
-        self.container = QWidget()  # создание контейнера для слоев с виджетами
-        self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
-        self.setCentralWidget(self.container)  # размещение контейнера в окне приложения
+        self.text_browser.setOpenExternalLinks(True)  # разрешение на открытие ссылок на внешние ресурсы
+        self.text_browser.append('<a href=https://ru.wikipedia.org>Wikia</a>')  # размещение ссылки в области браузера
+        self.setCentralWidget(self.text_browser)  # размещение контейнера в окне приложения
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
