@@ -7,7 +7,7 @@
 Формат конструктора класса QCalendarWidget:
 QCalendarWidget([parent=None])
 Класс QCalendarWidget поддерживает следующие методы (здесь представлены только основные
-- полный их список смотрите на странице https://doc.qtio/qt-6/qcalendarwidgethtml):
+- полный их список смотрите на странице https://doc.qt.io/qt-6/qcalendarwidget.html):
 ♦ setSelectedDate(<Дата QDate или date>) - устанавливает дату. Метод является слотом;
 ♦ selectedDate() - возвращает объект класса QDate с выбранной датой;
 ♦ setDateRange(<Минимум>, <Максимум>) - задает минимальное и максимальное допустимые
