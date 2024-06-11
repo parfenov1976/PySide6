@@ -84,14 +84,10 @@ from PySide6.QtWidgets import (QMainWindow,
                                QLabel,
                                QFrame,
                                )
-from PySide6.QtGui import Qt
-
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
 класса виджета ярлыка QLabel, класса слоя сетки для виджетов QGridLayout,
 базового класса пустого виджета QWidget, класса рамки для виджетов QFrame
-
-Импорт из модуля PySide6.QtCort класса перечислителя настроек виджетов Qt
 """
 
 
