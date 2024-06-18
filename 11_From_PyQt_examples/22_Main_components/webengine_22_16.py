@@ -139,6 +139,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QMainWindow,
                                )
 from PySide6.QtCore import QUrl
+from PySide6.QtGui import QIcon
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
@@ -146,6 +147,8 @@ from PySide6.QtCore import QUrl
 Импорт из модуля PySide6.QtWebEngineWidgets класса окна представления веб движка QWebEngineView
 
 Импорт из модуля PySide6.QtCort класса веб объекта url-адресов QUrl
+
+Импорт из модуля PySide.QtGui класса иконок QIcon
 """
 
 
@@ -162,10 +165,19 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Веб-браузер')  # установка заголовка главного окна приложения
         self.resize(800, 600)  # установка исходного размера главного окна приложения
-        self.web_view = QWebEngineView()
-        self.web_view.load(QUrl('https://www.google.ru/'))
+        self.web_view = QWebEngineView()  # создание веб представления для отображения страницы
+        self.web_view.load(QUrl('https://www.ya.ru/'))  # загрузка страницы по адресу
+        self.web_view.iconChanged.connect(self.icon_change)  # привязка обработчика на изменение значка страницы
 
-        self.setCentralWidget(self.web_view)
+        self.setCentralWidget(self.web_view)  # размещение виджета веб представления в главном окне приложения
+
+    def icon_change(self, item: QIcon) -> None:
+        """
+        Обработчика сигнала о смене значка страницы
+        :param item: QIcon - значок страницы
+        :return: None
+        """
+        self.setWindowIcon(item)  # установка иконки странички в заголовок окна приложения
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
