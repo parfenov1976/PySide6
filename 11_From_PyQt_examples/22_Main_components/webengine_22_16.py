@@ -137,12 +137,18 @@ https://doc.qt.io/qt-6/qwebenginepage.html):
 
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QMainWindow,
+                               QGridLayout,
+                               QWidget,
+                               QLineEdit,
+                               QProgressBar,
                                )
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon
 
 """
-Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow, 
+класс однострочного редактируемого поля QLineEdit, класс слоя сетки для виджетов QGridLayout,
+класса пустого базового виджета QWidget
 
 Импорт из модуля PySide6.QtWebEngineWidgets класса окна представления веб движка QWebEngineView
 
@@ -168,8 +174,21 @@ class MainWindow(QMainWindow):
         self.web_view = QWebEngineView()  # создание веб представления для отображения страницы
         self.web_view.load(QUrl('https://www.ya.ru/'))  # загрузка страницы по адресу
         self.web_view.iconChanged.connect(self.icon_change)  # привязка обработчика на изменение значка страницы
+        self.web_view.urlChanged.connect(self.url_change)  # привязка обработчика сигнала изменения адреса страницы
+        self.web_view.loadProgress.connect(lambda value: self.progress_bar.setValue(value))
+        self.url_line = QLineEdit()  # создание виджета адресной строки
+        self.url_line.setText('https://www.ya.ru/')  # размещение в адресной строке адреса по умолчанию
+        self.url_line.returnPressed.connect(self.url_change)  # привязка обработчика на ввод нового адреса
+        self.progress_bar = QProgressBar()  # создание шкалы прогресса загрузки
+        self.progress_bar.setRange(0, 100)  # установка диапазона значение прогресса
 
-        self.setCentralWidget(self.web_view)  # размещение виджета веб представления в главном окне приложения
+        self.grid = QGridLayout()  # создание слоя сетки для виджетов
+        self.grid.addWidget(self.url_line, 0, 0)  # размещение виджета в сетке
+        self.grid.addWidget(self.web_view, 1, 0)
+        self.grid.addWidget(self.progress_bar, 2, 0)
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.grid)  # размещение слоя в контейнере
+        self.setCentralWidget(self.container)  # размещение контейнера в главном окне приложения
 
     def icon_change(self, item: QIcon) -> None:
         """
@@ -178,6 +197,17 @@ class MainWindow(QMainWindow):
         :return: None
         """
         self.setWindowIcon(item)  # установка иконки странички в заголовок окна приложения
+
+    def url_change(self, url: QUrl = None) -> None:
+        """
+        Обработчик изменения адреса страницы
+        :param url: QUrl - объект нового адреса
+        :return: None
+        """
+        if url:
+            self.url_line.setText(url.toString())  # размещение нового адреса в адресной строке
+        else:
+            self.web_view.load(QUrl(self.url_line.text()))  # загрузка страницы по введенному адресу
 
 
 if __name__ == '__main__':  # проверка условия запуска данного файла для предотвращения запуска кода верхнего уровня
