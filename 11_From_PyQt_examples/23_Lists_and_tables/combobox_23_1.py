@@ -140,3 +140,77 @@ findData(<Данные> [, role=ItemDataRole.UserRole] [,
 ♦ textHighlighted(<Текст>) - то же самое, что и highlighted(), только в обработчик передается
   текст элемента.
 """
+
+from PySide6.QtWidgets import (QMainWindow,
+                               QComboBox,
+                               QGridLayout,
+                               QLabel,
+                               QWidget,
+                               QFrame,
+                               )
+from PySide6.QtGui import QIcon
+
+"""
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
+класса раскрывающегося списка QCombobox, класса слоя сетки для виджетов QGridLayout,
+класса ярлыка QLabel, класса базового пустого виджета QWidget
+"""
+
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект
+        """
+        super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        # QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Раскрывающийся список')  # установка заголовка главного окна приложения
+        self.setWindowIcon(QIcon.fromTheme(QIcon.ThemeIcon.WeatherClear))
+        self.resize(450, 300)  # установка исходного размера главного окна приложения
+        self.dd_lst_1 = QComboBox()  # создание списка
+        self.dd_lst_1.addItems(['One', 'Two', 'Three'])  # добавление элементов в список
+        self.dd_lst_1.addItem(QIcon.fromTheme(QIcon.ThemeIcon.WeatherClear), 'Icon', 123)  # добавление
+        # отдельного элемента в конец списка
+        self.lbl_1 = QLabel()  # создание ярлыка для отображения выбранного элемента
+        self.lbl_1.setFrameStyle(QFrame.Shape.Box)  # настройка рамки ярлыка
+        self.lbl_2 = QLabel()  # создание ярлыка для отображения подсвеченного элемента
+        self.lbl_2.setFrameStyle(QFrame.Shape.Box)  # настройка рамки ярлыка
+        self.dd_lst_1.textActivated.connect(lambda txt: self.lbl_1.setText(txt))  # привязка обработчика
+        # на выбор элемента списка
+        self.dd_lst_1.textHighlighted.connect(lambda txt: self.lbl_2.setText(txt))  # привязка обработчика
+        # на подсветку элемента списка
+
+        self.grid = QGridLayout()  # создание слоя сетки для виджетов
+        self.grid.addWidget(QLabel('Раскрывающийся список'), 0, 0)  # размещение виджета в сетке
+        self.grid.addWidget(self.dd_lst_1, 0, 1)
+        self.grid.addWidget(self.lbl_1, 0, 2)
+        self.grid.addWidget(self.lbl_2, 0, 3)
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
+        self.setCentralWidget(self.container)  # размещение контейнера в главном окне приложения
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
+    # кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления графического интерфейса
+    window = MainWindow()  # создание главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла в метод sys.exit()
