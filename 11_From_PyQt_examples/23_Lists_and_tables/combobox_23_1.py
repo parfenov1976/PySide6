@@ -147,13 +147,18 @@ from PySide6.QtWidgets import (QMainWindow,
                                QLabel,
                                QWidget,
                                QFrame,
+                               QLineEdit,
+                               QPushButton,
                                )
 from PySide6.QtGui import QIcon
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
 класса раскрывающегося списка QCombobox, класса слоя сетки для виджетов QGridLayout,
-класса ярлыка QLabel, класса базового пустого виджета QWidget
+класса ярлыка QLabel, класса базового пустого виджета QWidget, класс однострочного 
+редактируемого текстового поля QLineEdit, класса кнопки QPushButton
+
+Импорт из модуля PySide6.QtGui класса иконок QIcon
 """
 
 
@@ -184,12 +189,40 @@ class MainWindow(QMainWindow):
         # на выбор элемента списка
         self.dd_lst_1.textHighlighted.connect(lambda txt: self.lbl_2.setText(txt))  # привязка обработчика
         # на подсветку элемента списка
+        self.index_line = QLineEdit()  # создание поля для ввода индекса элемента в списке
+        self.index_line.setPlaceholderText('Индекс')  # установка подсказки
+        self.index_line.setInputMask('009')  # установка маски ввода
+        self.item_line = QLineEdit()  # создание поля для имени элемента в списке
+        self.item_line.setPlaceholderText('Название')  # установка подсказки
+        self.insert_btn = QPushButton('Вставить')  # создание кнопки для вставки элемента в список
+        self.insert_btn.clicked.connect(lambda: self.dd_lst_1.insertItem(int(self.index_line.text()),
+                                                                         self.item_line.text()
+                                                                         )
+                                        )  # обработка нажатия на кнопку вставки элемента списка
+        self.index_line_2 = QLineEdit()  # создание поля для ввода индекса элемента списка для удаления
+        self.index_line_2.setPlaceholderText('Индекс')  # добавление подсказки
+        self.index_line_2.setInputMask('009')  # установка маски ввода
+        self.remove_btn = QPushButton('Удалить')  # создание кнопки для вставки элемента в список
+        self.remove_btn.clicked.connect(lambda: self.dd_lst_1.removeItem(int(self.index_line_2.text())))
+        # обработка нажатия кнопки удаления элемента из списка
+        self.editable_list = QComboBox()
+        self.editable_list.addItems(['Первый', 'Второй', 'Третий'])
+        self.editable_list.setEditable(True)
 
         self.grid = QGridLayout()  # создание слоя сетки для виджетов
         self.grid.addWidget(QLabel('Раскрывающийся список'), 0, 0)  # размещение виджета в сетке
         self.grid.addWidget(self.dd_lst_1, 0, 1)
         self.grid.addWidget(self.lbl_1, 0, 2)
         self.grid.addWidget(self.lbl_2, 0, 3)
+        self.grid.addWidget(QLabel('Вставить элемент в список'), 1, 0)
+        self.grid.addWidget(self.index_line, 1, 1)
+        self.grid.addWidget(self.item_line, 1, 2)
+        self.grid.addWidget(self.insert_btn, 1, 3)
+        self.grid.addWidget(QLabel('Удалить элемент из списка'), 2, 0)
+        self.grid.addWidget(self.index_line_2, 2, 1)
+        self.grid.addWidget(self.remove_btn, 2, 2)
+        self.grid.addWidget(QLabel('Редактируемый список'), 3, 0)
+        self.grid.addWidget(self.editable_list, 3, 1)
         self.container = QWidget()  # создание контейнера для слоев с виджетами
         self.container.setLayout(self.grid)  # размещение слоя с виджетами в контейнере
         self.setCentralWidget(self.container)  # размещение контейнера в главном окне приложения
