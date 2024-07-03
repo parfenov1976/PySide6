@@ -125,4 +125,86 @@ QStandardItemModel(<Количество строк>, <Количество ст
 При изменении значения элемента генерируется сигнал itemChanged(<Элемент QStandardItem>).
 Внутри обработчика через параметр доступна ссылка на изменившийся элемент.
 """
-# todo добавить пример
+from PySide6.QtWidgets import (QMainWindow,
+                               QTableView,
+                               )
+from PySide6.QtGui import (QStandardItemModel,
+                           QIcon,
+                           QStandardItem,
+                           )
+import os
+
+"""
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
+класса представления таблицы QTableView
+
+Импорт из модуля PySide6.QtCore класса модели двухмерной модели QStandardItemModel,
+класса иконок QIcon, класса стандартного элемента модели QStandardItem
+
+Импорт модуля для работы с переменными среды os
+"""
+
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект, объект верхнего уровня
+        """
+        super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        # QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Двухмерная модель')  # установка заголовка главного окна
+        self.resize(400, 300)  # установка исходного размера главного окна
+        self.table_view = QTableView(parent=self)  # создание экземпляра табличного представления
+        self.table_model = QStandardItemModel()  # создание модели таблицы
+        # создаем списки элементов строк таблицы
+        lst_1 = ['Perl', 'РНР', 'Python', 'Ruby']
+        lst_2 = [' http://www.perl.org/', 'http://php.net/', 'https://www.python.org/',
+                 'https://www.ruby-lang.org/']
+        lst_3 = [QIcon(os.path.join('data', 'perl.png')),
+                 QIcon(os.path.join('data', 'php.png')),
+                 QIcon(os.path.join('data', 'python.png')),
+                 QIcon(os.path.join('data', 'ruby.png'))]
+        for name, link, ico in zip(lst_1, lst_2, lst_3):
+            self.table_model.appendRow([QStandardItem(ico, ''),  # создаем экземпляры элементов модели
+                                        QStandardItem(name),
+                                        QStandardItem(link)])
+        self.table_model.setHorizontalHeaderLabels(['Значок', 'Название', 'Сайт'])  # задаем строку заголовков столбцов
+        self.table_view.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_view.setColumnWidth(0, 50)  # задаем исходную ширину столбца
+        self.table_view.setColumnWidth(2, 200)
+
+        self.setCentralWidget(self.table_view)  # размещение представления в главном окне приложения
+
+        print(self.table_model.rowCount())  # выводим количество строек
+        self.table_model.setItem(3, 1, QStandardItem('Ruby on rails'))  # заменяем элемент в таблице
+        self.table_model.appendRow(QStandardItem('Bla'))  # добавляем строку в таблицу
+        self.table_model.appendColumn([QStandardItem('New column'), QStandardItem('New column')])  # добавляем столбец
+        self.table_model.insertRow(2)  # вставляем строку в таблицу по индексу строки
+
+        self.table_model.itemChanged.connect(lambda item: print(item.text()))  # обработка сигнала на изменение элемента
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
+    # кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления графического интерфейса
+    window = MainWindow()  # создание главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла в метод sys.exit()
