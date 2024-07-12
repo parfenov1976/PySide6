@@ -92,5 +92,108 @@ QHeaderView(<Ориентация>[, parent=None])
 ♦ sectionResized(<Логический индекс>, <Старый размер>, <Новый размер>) - генерируется
   непрерывно при изменении размера секции. Все параметры целочисленные.
 """
+from PySide6.QtWidgets import (QMainWindow,
+                               QTableView,
+                               QVBoxLayout,
+                               QWidget,
+                               QPushButton,
+                               )
+from PySide6.QtGui import (QStandardItemModel,
+                           QIcon,
+                           QStandardItem,
+                           )
+from PySide6.QtCore import Qt
+import os
 
-# TODO придумать пример
+"""
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
+класса представления таблицы QTableView, класс вертикальной стопки для виджетов QVBoxLayout,
+класса базового пустого виджета QWidget, класса виджета кнопку QPushButton
+
+Импорт из модуля PySide6.QtCore класса модели двухмерной модели QStandardItemModel,
+класса иконок QIcon, класса стандартного элемента модели QStandardItem
+
+Импорт из модуля PySide6.QtCore класса перечислителя свойств виджетов Qt
+
+Импорт модуля для работы с переменными среды os
+"""
+
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект, объект верхнего уровня
+        """
+        super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        # QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Двухмерная модель')  # установка заголовка главного окна
+        self.resize(500, 300)  # установка исходного размера главного окна
+        self.table_view = QTableView(parent=self)  # создание экземпляра табличного представления
+        self.table_model = QStandardItemModel()  # создание модели таблицы
+        # создаем списки элементов строк таблицы
+        lst_1 = ['Perl', 'РНР', 'Python', 'Ruby', 'C++']
+        lst_2 = [' http://www.perl.org/', 'http://php.net/', 'https://www.python.org/',
+                 'https://www.ruby-lang.org/', 'https://cplusplus.com/']
+        lst_3 = [QIcon(os.path.join('data', 'perl.png')),
+                 QIcon(os.path.join('data', 'php.png')),
+                 QIcon(os.path.join('data', 'python.png')),
+                 QIcon(os.path.join('data', 'ruby.png')),
+                 QIcon(os.path.join('data', 'ruby.png'))]
+        lst_4 = ['Перл', 'ПХП', 'Пайтон', 'Руби', 'Плюса']
+        for name, link, ico, trans in zip(lst_1, lst_2, lst_3, lst_4):
+            self.table_model.appendRow([QStandardItem(ico, ''),  # создаем экземпляры элементов модели
+                                        QStandardItem(name),
+                                        QStandardItem(link),
+                                        QStandardItem(trans)])
+        self.table_model.setHorizontalHeaderLabels(['Значок', 'Название', 'Сайт', 'Перевод'])  # задаем строку
+        # заголовков столбцов
+        self.table_view.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_view.setColumnWidth(0, 50)  # задаем исходную ширину столбца
+        self.table_view.setColumnWidth(2, 200)
+        self.h_header = self.table_view.horizontalHeader()  # извлекаем и сохраняем ссылку на горизонтальные заголовки
+        self.v_header = self.table_view.verticalHeader()  # извлекаем и сохраняем ссылку на вертикальные заголовки
+        self.btn_1 = QPushButton('Спрятать/показать 1-ый столбец')  # создаем кнопку
+        self.btn_1.clicked.connect(lambda: self.h_header.setSectionHidden(0,
+                                                                          not self.h_header.isSectionHidden(0)))
+        # обработка сигнала нажатия на кнопку
+        self.btn_2 = QPushButton('Поменять местами строки 1 и 4')
+        self.btn_2.clicked.connect(lambda: self.v_header.swapSections(0, 3))
+        self.h_header.setSectionsMovable(True)  # включает возможность перемещать столбцы с помощью мыши
+
+        self.h_header.sectionMoved.connect(lambda logical_index, old_visual_index, new_visual_index:
+                                           print(logical_index, old_visual_index, new_visual_index))
+        # обработка сигнала на перемещение столбцов
+
+        self.vbox = QVBoxLayout()  # создание вертикальной стопки для виджетов
+        self.vbox.addWidget(self.table_view)  # добавление представления в стопку
+        self.vbox.addWidget(self.btn_1)  # добавление кнопки в стопку
+        self.vbox.addWidget(self.btn_2)
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.vbox)  # размещение слоя в контейнере
+        self.setCentralWidget(self.container)  # размещение контейнера в главном окне приложения
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
+    # кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления графического интерфейса
+    window = MainWindow()  # создание главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла в метод sys.exit()
