@@ -83,3 +83,111 @@ QItemSelectionModel(<Модель>, <Родитель>)
 """
 
 # TODO придумать пример
+
+from PySide6.QtWidgets import (QMainWindow,
+                               QTableView,
+                               QVBoxLayout,
+                               QWidget,
+                               QLabel,
+                               )
+from PySide6.QtGui import (QStandardItemModel,
+                           QIcon,
+                           QStandardItem,
+                           )
+from PySide6.QtCore import QItemSelectionModel
+import os
+
+"""
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
+класса представления таблицы QTableView, класс вертикальной стопки для виджетов QVBoxLayout,
+класса базового пустого виджета QWidget, класса ярлыка QLabel
+
+Импорт из модуля PySide6.QtCore класса модели двухмерной модели QStandardItemModel,
+класса иконок QIcon, класса стандартного элемента модели QStandardItem
+
+Импорт из модуля PySide6.QtCore класса модели управления выделением
+
+Импорт модуля для работы с переменными среды os
+"""
+
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект, объект верхнего уровня
+        """
+        super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        # QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Модель управления выделением')  # установка заголовка главного окна
+        self.resize(500, 600)  # установка исходного размера главного окна
+        self.table_view_1 = QTableView()  # создание экземпляра табличного представления
+        self.table_view_2 = QTableView()  # создание экземпляра табличного представления
+        self.table_model = QStandardItemModel()  # создание модели таблицы
+        # создаем списки элементов строк таблицы
+        lst_1 = ['Perl', 'РНР', 'Python', 'Ruby', 'C++']
+        lst_2 = [' http://www.perl.org/', 'http://php.net/', 'https://www.python.org/',
+                 'https://www.ruby-lang.org/', 'https://cplusplus.com/']
+        lst_3 = [QIcon(os.path.join('data', 'perl.png')),
+                 QIcon(os.path.join('data', 'php.png')),
+                 QIcon(os.path.join('data', 'python.png')),
+                 QIcon(os.path.join('data', 'ruby.png')),
+                 QIcon(os.path.join('data', 'ruby.png'))]
+        lst_4 = ['Перл', 'ПХП', 'Пайтон', 'Руби', 'Плюса']
+        for name, link, ico, trans in zip(lst_1, lst_2, lst_3, lst_4):
+            self.table_model.appendRow([QStandardItem(ico, ''),  # создаем экземпляры элементов модели
+                                        QStandardItem(name),
+                                        QStandardItem(link),
+                                        QStandardItem(trans)])
+        self.table_model.setHorizontalHeaderLabels(['Значок', 'Название', 'Сайт', 'Перевод'])  # задаем строку
+        # заголовков столбцов
+        self.table_view_1.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_view_1.setColumnWidth(0, 50)  # задаем исходную ширину столбца
+        self.table_view_1.setColumnWidth(2, 200)
+
+        self.table_view_2.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_view_2.setColumnWidth(0, 50)  # задаем исходную ширину столбца
+        self.table_view_2.setColumnWidth(2, 200)
+
+        self.selection_model = QItemSelectionModel(self.table_model)  # создаем модель управления выделением
+        # с подключение модели данных
+        self.table_view_1.setSelectionModel(self.selection_model)  # подключение модели выделения к представлению
+        self.table_view_2.setSelectionModel(self.selection_model)
+        self.selection_model.currentChanged.connect(lambda prev, cur: print(prev, cur))  # сигнал на изменение выделения
+        # и его обработчик
+
+        self.vbox = QVBoxLayout()  # создание вертикальной стопки для виджетов
+        self.vbox.addWidget(QLabel('Первое представление'))  # добавление ярлыка с надписью
+        self.vbox.addWidget(self.table_view_1)  # добавление представления в стопку
+        self.vbox.addWidget(QLabel('Второе представление'))
+        self.vbox.addWidget(self.table_view_2)
+
+        self.container = QWidget()  # создание контейнера для слоев с виджетами
+        self.container.setLayout(self.vbox)  # размещение слоя в контейнере
+        self.setCentralWidget(self.container)  # размещение контейнера в главном окне приложения
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
+    # кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления графического интерфейса
+    window = MainWindow()  # создание главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла в метод sys.exit()
+
