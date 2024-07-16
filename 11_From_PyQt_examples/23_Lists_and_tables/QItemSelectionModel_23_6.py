@@ -82,8 +82,6 @@ QItemSelectionModel(<Модель>, <Родитель>)
   выделение, а через второй - новое выделение (объекты класса QItemSelection).
 """
 
-# TODO придумать пример
-
 from PySide6.QtWidgets import (QMainWindow,
                                QTableView,
                                QVBoxLayout,
