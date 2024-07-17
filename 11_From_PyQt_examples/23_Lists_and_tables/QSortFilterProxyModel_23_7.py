@@ -74,28 +74,30 @@ from PySide6.QtWidgets import (QMainWindow,
                                QVBoxLayout,
                                QWidget,
                                QLabel,
+                               QLineEdit,
                                )
 from PySide6.QtGui import (QStandardItemModel,
                            QIcon,
                            QStandardItem,
                            )
-from PySide6.QtCore import QSortFilterProxyModel
+from PySide6.QtCore import QSortFilterProxyModel, Qt
 import os
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
 класса представления таблицы QTableView, класс вертикальной стопки для виджетов QVBoxLayout,
-класса базового пустого виджета QWidget, класса ярлыка QLabel
+класса базового пустого виджета QWidget, класса ярлыка QLabel, 
+класс однострочного редактируемого текстового поля QLineEdit
 
 Импорт из модуля PySide6.QtCore класса модели двухмерной модели QStandardItemModel,
 класса иконок QIcon, класса стандартного элемента модели QStandardItem
 
-Импорт из модуля PySide6.QtCore класса модели управления сортировкой и фильтрацией QSortFilterProxyModel
+Импорт из модуля PySide6.QtCore класса модели управления сортировкой и фильтрацией QSortFilterProxyModel,
+класса перечислителя настроек виджетов Qt
 
 Импорт модуля для работы с переменными среды os
 """
 
-# TODO доработать пример
 
 class MainWindow(QMainWindow):
     """
@@ -115,7 +117,7 @@ class MainWindow(QMainWindow):
         self.table_view_2 = QTableView()  # создание экземпляра табличного представления
         self.table_model = QStandardItemModel()  # создание модели таблицы
         # создаем списки элементов строк таблицы
-        lst_1 = ['Perl', 'РНР', 'Python', 'Ruby', 'C++']
+        lst_1 = ['Perl', 'PHP', 'Python', 'Ruby', 'C++']
         lst_2 = [' http://www.perl.org/', 'http://php.net/', 'https://www.python.org/',
                  'https://www.ruby-lang.org/', 'https://cplusplus.com/']
         lst_3 = [QIcon(os.path.join('data', 'perl.png')),
@@ -131,21 +133,37 @@ class MainWindow(QMainWindow):
                                         QStandardItem(trans)])
         self.table_model.setHorizontalHeaderLabels(['Значок', 'Название', 'Сайт', 'Перевод'])  # задаем строку
         # заголовков столбцов
-        self.table_view_1.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_proxy_model_1 = QSortFilterProxyModel()  # создание промежуточной модели для сортировки и фильтарции
+        self.table_proxy_model_1.setSourceModel(self.table_model)  # подключение исходной модели данный к промежуточной
+        # модели
+        self.table_proxy_model_2 = QSortFilterProxyModel()
+        self.table_proxy_model_2.setSourceModel(self.table_model)
+
+        self.table_view_1.setModel(self.table_proxy_model_1)  # присоединяем модель к представлению
         self.table_view_1.setColumnWidth(0, 50)  # задаем исходную ширину столбца
         self.table_view_1.setColumnWidth(2, 200)
         self.table_view_1.setSortingEnabled(True)
 
-        self.table_view_2.setModel(self.table_model)  # присоединяем модель к представлению
+        self.table_view_2.setModel(self.table_proxy_model_2)  # присоединяем модель к представлению
         self.table_view_2.setColumnWidth(0, 50)  # задаем исходную ширину столбца
         self.table_view_2.setColumnWidth(2, 200)
         self.table_view_2.setSortingEnabled(True)
+
+        self.filter_field = QLineEdit()  # создание однострочного редактируемого поля для строки фильтрации
+        self.filter_field.setPlaceholderText('Введите значение для фильтрации по названию')
+        # размещение в редактируемом поле текста подсказки
+        self.table_proxy_model_2.setFilterKeyColumn(1)  # включение фильтрации по 2-му столбцу
+        self.table_proxy_model_2.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        # включение режима фильтрации без учета регистра
+        self.filter_field.textChanged.connect(lambda txt: self.table_proxy_model_2.setFilterFixedString(txt))
+        # сигнал на изменение текста и его обработчик с фильтрацией по образцу текста
 
         self.vbox = QVBoxLayout()  # создание вертикальной стопки для виджетов
         self.vbox.addWidget(QLabel('Первое представление'))  # добавление ярлыка с надписью
         self.vbox.addWidget(self.table_view_1)  # добавление представления в стопку
         self.vbox.addWidget(QLabel('Второе представление'))
         self.vbox.addWidget(self.table_view_2)
+        self.vbox.addWidget(self.filter_field)
 
         self.container = QWidget()  # создание контейнера для слоев с виджетами
         self.container.setLayout(self.vbox)  # размещение слоя в контейнере
