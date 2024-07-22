@@ -71,5 +71,127 @@ QObject - QAbstractItemDelegate - QStyledItemDelegate
   Если в какой-либо ячейке представления действуют одновременно два делегата, заданные
   для столбца и для строки, будет использоваться делегат, заданный для строки.
 """
+from PySide6.QtWidgets import (QMainWindow,
+                               QTableView,
+                               QStyledItemDelegate,
+                               QSpinBox,
+                               )
+from PySide6.QtGui import (QStandardItemModel,
+                           QStandardItem,
+                           )
+from PySide6.QtCore import Qt
 
-# TODO добавить пример
+"""
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
+класса представления таблицы QTableView,
+класса делегата с поддержкой различных редакторов QStyledItemDelegate,
+класса поля для ввода чисел с помощью стрелочек QSpinBox
+
+Импорт из модуля PySide6.QtCore класса модели двухмерной модели QStandardItemModel,
+класса стандартного элемента модели QStandardItem
+
+Импорт из модуля PySide6.QtCore класса перечислителя настроек виджетов Qt
+"""
+
+
+class SpinBoxDelegate(QStyledItemDelegate):
+    """
+    Класс делегата
+    """
+
+    def createEditor(self, parent, option, index):
+        """
+        Создание компонента-редактора, используемого для изменения количественных значений
+        :param parent: ссылка на родительский объект - компонент представления
+        :param option: объект класса QStyleOptionViewItem, хранящий дополнительные настройки делегата
+        :param index: объекта класса QModelIndex - индекс текущего элемента модели
+        :return: None
+        """
+        editor = QSpinBox(parent)  # создаем компонент редактора значений
+        editor.setFrame(False)  # отключаем отображение рамки вокруг компонента редактора
+        editor.setMinimum(0)  # устанавливаем значение минимума для поля
+        editor.setSingleStep(1)  # устанавливаем значение одного шага
+        return editor  # возвращаем созданный объект редактора компонента
+
+    def setEditorData(self, editor, index):
+        """
+        Внесение значения количества в компонент-редактор
+        :param editor: ссылка на объект компонент-редактора
+        :param index: объекта класса QModelIndex - индекс текущего элемента модели
+        :return: None
+        """
+        value = int(index.model().data(index, Qt.ItemDataRole.EditRole))  # извлечение значения количества
+        # из компонента представления
+        editor.setValue(value)  # установка количественного значения в компонент-редактор
+
+    def updateEditorGeometry(self, editor, option, index):
+        """
+        Установка размеров компонент-редактора
+        :param editor: ссылка на объект компонент-редактора
+        :param option: объект класса QStyleOptionViewItem, хранящий дополнительные настройки делегата
+        :param index: объекта класса QModelIndex - индекс текущего элемента модели
+        :return: None
+        """
+        editor.setGeometry(option.rect)
+
+    def setModelData(self, editor, model, index):
+        """
+        Внесение исправленного количественного значения в модель данных
+        :param editor: ссылка на объект компонент-редактора
+        :param model: ссылка на модель данных
+        :param index: объекта класса QModelIndex - индекс текущего элемента модели
+        :return: None
+        """
+        value = str(editor.value())
+        model.setData(index, value, Qt.ItemDataRole.EditRole)
+
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект
+        """
+        # super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Использование делегата')  # установка заголовка главного окна приложения
+        self.resize(300, 300)  # установка исходного размера окна
+        self.table_view = QTableView()  # создание представления для таблицы
+        self.table_model = QStandardItemModel(parent=self)  # создаем модель данных таблицы
+        lst_1 = ['Флеш-диск', 'Бумага для принтера', 'Картридж для принтера']  # создаем список наименований товара
+        lst_2 = ['10', '3', '8']  # создаем список количественных показателей
+        for row in range(0, 3):  # создаем таблицу
+            item_1 = QStandardItem(lst_1[row])  # создаем элемент таблицы
+            item_2 = QStandardItem(lst_2[row])  # создаем элемент таблицы
+            self.table_model.appendRow([item_1, item_2])  # добавляем в таблицу строку
+        self.table_model.setHorizontalHeaderLabels(['Товар', 'Количество'])  # добавляем в модель данных
+        # строку заголовков столбцов
+        self.table_view.setModel(self.table_model)  # подключаем модель к представлению
+        self.table_view.setColumnWidth(0, 150)  # устанавливаем ширину первого столбца
+        self.table_view.setItemDelegateForColumn(1, SpinBoxDelegate())
+        self.setCentralWidget(self.table_view)  # добавляем представление таблицы в главного окно приложения
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
+    # кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления графического интерфейса
+    window = MainWindow()  # создание главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла
