@@ -88,8 +88,8 @@ if __name__ == '__main__':  # проверка условия запуска д�
     sqlite_con = SQLiteDatabaseConnection('data.sqlite')  # создание объекта соединения с базой данных
     sqlite_con.open()  # открытие базы
     window.append_txt(str(sqlite_con.tables()))  # вывод списка таблиц базы данных
-    table = sqlite_con.record('albums')
-    window.append_txt(str(table))
+    table = sqlite_con.record('albums')  # запрос структуры одной из таблиц базы данных
+    window.append_txt(str(table))  # вывод данных объекта информации о таблице
     window.append_txt(f'Количество полей в таблице: {str(table.count())}')
     window.append_txt(f'Имя поля 1: {str(table.fieldName(1))}')
     window.append_txt(f'Индекс поля AlbumId: {str(table.indexOf('AlbumId'))}')
