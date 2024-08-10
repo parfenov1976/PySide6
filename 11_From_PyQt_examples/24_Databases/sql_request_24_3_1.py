@@ -97,31 +97,17 @@ class MainWindow(QMainWindow):
         self.txt_field.appendPlainText(txt)  # добавление текста
 
 
-class SQLiteDatabaseConnection(QSqlDatabase):
-    """
-    Класс соединения с базой данных
-    """
-
-    def __init__(self, db_name: str) -> None:
-        """
-        Конструктов соединения с базой данных
-        :param db_name: str - имя файла базы данных
-        """
-        QSqlDatabase.__init__(self, 'QSQLITE')  # явный вызов конструктора родительского класса
-        self.setDatabaseName(db_name)  # подключение базы данных
-
-
 def main():
     """
     Код примеров
     :return:
     """
-    sqlite_con = SQLiteDatabaseConnection('data.sqlite')  # создание объекта соединения с базой данных
+    sqlite_con = QSqlDatabase.addDatabase('QSQLITE')  # создание объекта соединения с базой данных
+    sqlite_con.setDatabaseName('data.sqlite')  # подключение базы данных
     sqlite_con.open()  # открытие базы данных
-    QSqlQuery().exec('DROP TABLE [IF EXISTS] good')  # удаление тестовой таблицы из базы данных если она существует
+    QSqlQuery().exec('DROP TABLE IF EXISTS good')  # удаление тестовой таблицы из базы данных если она существует
 
     # --== Использование метода exec() ==--
-    # FIXME что-то не работает
     query = QSqlQuery()  # создание объекта запроса
     window.append_txt(f'Список таблиц до создания таблицы good: {str(sqlite_con.tables())}')
     query.exec('CREATE TABLE good(id integer primary key autoincrement, goodname text, goodcount integer)')
