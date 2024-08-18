@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
 
 def main() -> None:
     """
-    Код примера выполнения запроса и его очистки
+    Код примера
     :return: None
     """
     sqlite_con = QSqlDatabase.addDatabase('QSQLITE')  # создание объекта соединения с базой данных
