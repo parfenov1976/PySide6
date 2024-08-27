@@ -165,7 +165,7 @@ from PySide6.QtCore import Qt
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow,
 
 Импорт из модуля PySide6.QtGui класса моделей цветов QColor, 
-класса инструментов для рисования QPainter,
+класса инструментов для рисования QPainter, класса кисти QBrush
 
 Импорт из модуля PySide6.QtCore класса перечислителя настроек виджетов Qt
 """
