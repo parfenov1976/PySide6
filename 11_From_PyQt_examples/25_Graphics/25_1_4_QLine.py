@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         :param parent: ссылка на родительский объект
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
-        self.setWindowTitle('Класс объекта кисти QBrush')  # установка заголовка главного окна
+        self.setWindowTitle('Класс объекта линии QLine')  # установка заголовка главного окна
         self.resize(300, 300)  # установка исходного размера главного окна
 
     def paintEvent(self, event) -> None:
