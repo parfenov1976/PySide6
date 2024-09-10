@@ -21,8 +21,8 @@ https://doc.qt.io/qt-6/qpainter.html):
   drawPoint(<X>, <У>)
   drawPoint(<Координаты QPoint или QPointF>)
 ♦ drawPoints() - рисует несколько точек. Форматы метода:
-  drawPoints(<Координаты QPoint 1>[, . . . , <Координаты QPoint N>])
-  drawPoints(<Координаты QPointF 1>[, . . . , <Координаты QPointF N>])
+  drawPoints(<Координаты QPoint 1>[, . . . , <Координаты QPoint N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
+  drawPoints(<Координаты QPointF 1>[, . . . , <Координаты QPointF N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
   drawPoints(<Многоугольник QPolygon или QPolygonF>)
 ♦ drawLine() - рисует линию. Форматы метода:
   drawLine(<Линия QLine или QLineF>)
@@ -30,11 +30,11 @@ https://doc.qt.io/qt-6/qpainter.html):
   drawLine(<Начальная точка QPointF>, <Конечная точка QPointF>)
   drawLine(<X1>, <Y1>, <Х2>, <У2>)
 ♦ drawLines() - рисует несколько отдельных линий. Форматы метода:
-  drawLines(<Пиния QLine 1>[, . . . , <Пиния QLine N>])
-  drawLines(<Линия QLineF 1>[, . . . , <Пиния QLineF N>])
+  drawLines(<Пиния QLine 1>[, . . . , <Пиния QLine N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
+  drawLines(<Линия QLineF 1>[, . . . , <Пиния QLineF N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
   drawLines(<Список с линиями QLineF>)
-  drawLines(<Точка QPoint 1>[, . . . , <Точка QPoint N>])
-  drawLines(<Точка QPointF 1>[, . . . , <Точка QPointF N>])
+  drawLines(<Точка QPoint 1>[, . . . , <Точка QPoint N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
+  drawLines(<Точка QPointF 1>[, . . . , <Точка QPointF N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
 ♦ drawPolyline() - рисует несколько линий, которые соединяют указанные точки. Первая
   и последняя точки не соединяются. Форматы метода:
   drawPolyline(<Точка QPoint 1>[, . . . , <Точка QPoint N>])
@@ -111,6 +111,8 @@ from PySide6.QtWidgets import (QMainWindow,
 from PySide6.QtGui import (QPainter,
                            QBrush,
                            QPen,
+                           QPolygon,
+                           QPolygonF,
                            )
 from PySide6.QtCore import (Qt,
                             QLine,
@@ -123,7 +125,7 @@ from PySide6.QtCore import (Qt,
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
 
 Импорт из модуля PySide6.QtGui класса пера QPen, класса инструментов для рисования QPainter,
-класса кисти QBrush
+класса кисти QBrush, классы многоугольников QPolygon и QPolygonF
 
 Импорт из модуля PySide6.QtCore класса перечислителя настроек виджетов Qt, классов линий QLine и QLineF,
 классов точек QPoint и QPointF,
@@ -143,7 +145,7 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Класс объекта шрифта QFont')  # установка заголовка главного окна
-        self.resize(300, 300)  # установка исходного размера главного окна
+        self.resize(600, 600)  # установка исходного размера главного окна
 
     def paintEvent(self, event) -> None:
         """
@@ -155,12 +157,31 @@ class MainWindow(QMainWindow):
         black = Qt.GlobalColor.black  # создание объекта цвета из глобального перечислителя цветов
         white = Qt.GlobalColor.white  # создание объекта цвета из глобального перечислителя цветов
         red = Qt.GlobalColor.red  # создание объекта цвета из глобального перечислителя цветов
+        blue = Qt.GlobalColor.blue
+        cyan = Qt.GlobalColor.darkCyan
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)  # установка режима сглаживания лесенок
         painter.setPen(QPen(black))  # создание пера с настройками и установка пера в рисовальщик
         painter.setBrush(QBrush(white))  # создание и применение кисти для заливки фигур к рисовальщику
-        painter.drawRect(3, 3, 294, 294)  # рисование прямоугольника
+        painter.drawRect(3, 3, 594, 594)  # рисование прямоугольника
 
-        # --== Рисование линии drawLine()
+        # --== Рисование точки drawPoint() ==--
+        painter.setPen(QPen(cyan, 10))  # установка настроек пера в рисовальщик
+        painter.drawPoint(QPoint(50, 75))
+        painter.drawPoint(QPointF(75.0, 75.0))
+        painter.drawPoint(100, 75)
+        for n in range(1, 5):
+            painter.drawPoint(QPoint(25 + n * 25, 125))
+
+        # --== Рисование нескольких точек drawPoints() ==--
+        painter.setPen(QPen(cyan, 10))  # установка настроек пера в рисовальщик
+        painter.drawPoints([QPoint(50, 165), QPoint(75, 185), QPoint(100, 175)])
+        painter.drawPoints([QPointF(175.0, 165.0), QPointF(200.0, 185.0), QPointF(225.0, 175.0)])
+        polygon = QPolygon([QPoint(50, 240), QPoint(100, 240), QPoint(75, 290)])
+        painter.drawPoints(polygon)
+        polygon_f = QPolygonF([QPointF(150.0, 240.0), QPointF(200.0, 240.0), QPointF(175.0, 290.0)])
+        painter.drawPoints(polygon_f)
+
+        # --== Рисование линии drawLine() ==--
         painter.setPen(QPen(red, 4, s=Qt.PenStyle.SolidLine))  # установка настроек пера в рисовальщик
         painter.drawLine(QLine(20, 50, 280, 50))  # рисование линии
         painter.setPen(QPen(red, 4, s=Qt.PenStyle.DashLine))  # установка настроек пера в рисовальщик
@@ -171,6 +192,13 @@ class MainWindow(QMainWindow):
         painter.drawLine(QPointF(20.0, 200.0), QPointF(280.0, 200.0))  # рисование линии
         painter.setPen(QPen(red, 4, s=Qt.PenStyle.DashDotDotLine))  # установка настроек пера в рисовальщик
         painter.drawLine(20, 250, 280, 250)  # рисование линии
+
+        # --== Рисование нескольких линий drawLines() ==--
+        painter.setPen(QPen(blue, 2, s=Qt.PenStyle.SolidLine))  # установка настроек пера в рисовальщик
+        painter.drawLines((QLine(20, 350, 280, 350), QLine(20, 360, 280, 360)))
+        painter.drawLines([QLineF(20.0, 370.0, 280.0, 370.0), QLineF(20.0, 380.0, 280, 380.0)])
+        painter.drawLines([QPoint(20, 430), QPoint(280, 430), QPoint(20, 440), QPoint(280, 440)])
+        painter.drawLines([QPointF(20.0, 450.0), QPointF(280.0, 450.0), QPointF(20.0, 460.0), QPointF(280.0, 460.0)])
 
         # TODO продолжить пример
 
