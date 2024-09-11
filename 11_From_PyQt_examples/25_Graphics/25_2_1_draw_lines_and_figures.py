@@ -105,6 +105,7 @@ painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
 вторым параметром значение False:
 painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, False)
 """
+from collections.abc import Sized
 
 from PySide6.QtWidgets import (QMainWindow,
                                )
@@ -119,7 +120,10 @@ from PySide6.QtCore import (Qt,
                             QLineF,
                             QPoint,
                             QPointF,
+                            QRect,
+                            QRectF,
                             )
+from fontTools.feaLib.ast import SizeParameters
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
@@ -128,7 +132,7 @@ from PySide6.QtCore import (Qt,
 класса кисти QBrush, классы многоугольников QPolygon и QPolygonF
 
 Импорт из модуля PySide6.QtCore класса перечислителя настроек виджетов Qt, классов линий QLine и QLineF,
-классов точек QPoint и QPointF,
+классов точек QPoint и QPointF, классов прямоугольников QRect и QRectF
 
 """
 
@@ -159,6 +163,7 @@ class MainWindow(QMainWindow):
         red = Qt.GlobalColor.red  # создание объекта цвета из глобального перечислителя цветов
         blue = Qt.GlobalColor.blue
         cyan = Qt.GlobalColor.darkCyan
+        magenta = Qt.GlobalColor.magenta
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)  # установка режима сглаживания лесенок
         painter.setPen(QPen(black))  # создание пера с настройками и установка пера в рисовальщик
         painter.setBrush(QBrush(white))  # создание и применение кисти для заливки фигур к рисовальщику
@@ -199,6 +204,31 @@ class MainWindow(QMainWindow):
         painter.drawLines([QLineF(20.0, 370.0, 280.0, 370.0), QLineF(20.0, 380.0, 280, 380.0)])
         painter.drawLines([QPoint(20, 430), QPoint(280, 430), QPoint(20, 440), QPoint(280, 440)])
         painter.drawLines([QPointF(20.0, 450.0), QPointF(280.0, 450.0), QPointF(20.0, 460.0), QPointF(280.0, 460.0)])
+
+        # --== Рисование прямоугольника drawRect() ==--
+        painter.setPen(QPen(magenta, 2, s=Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.GlobalColor.black, bs=Qt.BrushStyle.Dense5Pattern))
+        painter.drawRect(350, 50, 80, 80)
+
+        painter.setBrush(QBrush(Qt.GlobalColor.black, bs=Qt.BrushStyle.CrossPattern))
+        painter.drawRect(QRect(450, 50, 80, 80))
+
+        painter.setBrush(QBrush(Qt.GlobalColor.black, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawRect(QRectF(350.0, 150.0, 80.0, 80.0))
+
+        painter.setPen(QPen(magenta, 2, s=Qt.PenStyle.NoPen))
+        painter.setBrush(QBrush(Qt.GlobalColor.green, bs=Qt.BrushStyle.SolidPattern))
+        painter.drawRect(QRect(450, 150, 80, 80))
+
+        # --== Рисование прямоугольника с заливкой без границ fillRect() ==--
+        painter.setPen(QPen(magenta, 2, s=Qt.PenStyle.SolidLine))
+        painter.fillRect(350, 250, 80, 80, QBrush(Qt.GlobalColor.green, bs=Qt.BrushStyle.Dense5Pattern))
+        painter.fillRect(QRect(450, 250, 80, 80), Qt.GlobalColor.green)
+
+        # --== Рисование прямоугольника с закруглением на углах drawRoundedRect() ==--
+        painter.setBrush(QBrush(Qt.GlobalColor.black, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawRoundedRect(350, 350, 80, 80, 20, 20, mode=Qt.SizeMode.AbsoluteSize)
+        painter.drawRoundedRect(QRect(450, 350, 80, 80), 20, 20, mode=Qt.SizeMode.RelativeSize)
 
         # TODO продолжить пример
 
