@@ -37,8 +37,8 @@ https://doc.qt.io/qt-6/qpainter.html):
   drawLines(<Точка QPointF 1>[, . . . , <Точка QPointF N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
 ♦ drawPolyline() - рисует несколько линий, которые соединяют указанные точки. Первая
   и последняя точки не соединяются. Форматы метода:
-  drawPolyline(<Точка QPoint 1>[, . . . , <Точка QPoint N>])
-  drawPolyline(<Точка QPointF 1>[, . . . , <Точка QPointF N>])
+  drawPolyline(<Точка QPoint 1>[, . . . , <Точка QPoint N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
+  drawPolyline(<Точка QPointF 1>[, . . . , <Точка QPointF N>]) НЕ РАБОТАЕТ, ДОЛЖЕН БЫТЬ СПИСОК ИЛИ КОРТЕЖ
   drawPolyline(<Многоугольник QPolygon или QPolygonF>)
 ♦ drawRect() - рисует прямоугольник с границей и заливкой. Чтобы убрать границу, следует
   использовать перо со стилем NoPen, а чтобы убрать заливку - кисть со стилем
@@ -124,6 +124,7 @@ from PySide6.QtCore import (Qt,
                             QRectF,
                             )
 from fontTools.feaLib.ast import SizeParameters
+from matplotlib.patches import Polygon
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
@@ -149,7 +150,7 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         self.setWindowTitle('Класс объекта шрифта QFont')  # установка заголовка главного окна
-        self.resize(600, 600)  # установка исходного размера главного окна
+        self.resize(600, 700)  # установка исходного размера главного окна
 
     def paintEvent(self, event) -> None:
         """
@@ -167,7 +168,7 @@ class MainWindow(QMainWindow):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)  # установка режима сглаживания лесенок
         painter.setPen(QPen(black))  # создание пера с настройками и установка пера в рисовальщик
         painter.setBrush(QBrush(white))  # создание и применение кисти для заливки фигур к рисовальщику
-        painter.drawRect(3, 3, 594, 594)  # рисование прямоугольника
+        painter.drawRect(3, 3, 594, 694)  # рисование прямоугольника
 
         # --== Рисование точки drawPoint() ==--
         painter.setPen(QPen(cyan, 10))  # установка настроек пера в рисовальщик
@@ -205,6 +206,13 @@ class MainWindow(QMainWindow):
         painter.drawLines([QPoint(20, 430), QPoint(280, 430), QPoint(20, 440), QPoint(280, 440)])
         painter.drawLines([QPointF(20.0, 450.0), QPointF(280.0, 450.0), QPointF(20.0, 460.0), QPointF(280.0, 460.0)])
 
+        # --== Рисование полилинии drawPolyline() ==--
+        painter.setPen(QPen(red, 2, s=Qt.PenStyle.SolidLine))
+        painter.drawPolyline([QPoint(20, 500), QPoint(70, 525), QPoint(20, 550), QPoint(35, 525)])
+        painter.drawPolyline(QPolygon([QPoint(120, 500), QPoint(170, 525), QPoint(120, 550), QPoint(135, 525)]))
+        painter.drawPolyline(
+            [QPointF(220.0, 500.0), QPointF(270.0, 525.0), QPointF(220.0, 550.0), QPointF(235.0, 525.0)])
+
         # --== Рисование прямоугольника drawRect() ==--
         painter.setPen(QPen(magenta, 2, s=Qt.PenStyle.SolidLine))
         painter.setBrush(QBrush(Qt.GlobalColor.black, bs=Qt.BrushStyle.Dense5Pattern))
@@ -230,7 +238,39 @@ class MainWindow(QMainWindow):
         painter.drawRoundedRect(350, 350, 80, 80, 20, 20, mode=Qt.SizeMode.AbsoluteSize)
         painter.drawRoundedRect(QRect(450, 350, 80, 80), 20, 20, mode=Qt.SizeMode.RelativeSize)
 
-        # TODO продолжить пример
+        # --== Рисование многоугольников drawPolygon() ==--
+        painter.setPen(QPen(blue, 2, s=Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.GlobalColor.magenta, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawPolygon(QPolygon([QPoint(20, 600), QPoint(120, 600), QPoint(120, 675), QPoint(120, 675),
+                                      QPoint(20, 675), QPoint(100, 615), QPoint(100, 660)]),
+                            fillRule=Qt.FillRule.OddEvenFill)
+        painter.drawPolygon(QPolygon([QPoint(170, 600), QPoint(270, 600), QPoint(270, 675), QPoint(270, 675),
+                                      QPoint(170, 675), QPoint(250, 615), QPoint(250, 660)]),
+                            fillRule=Qt.FillRule.WindingFill)
+
+        # --== Рисование эллипса drawEllipse() ==--
+        painter.setPen(QPen(blue, 2, s=Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.GlobalColor.magenta, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawEllipse(350, 450, 80, 40)
+        painter.drawEllipse(QRect(450, 450, 80, 40))
+        painter.drawEllipse(QPoint(390, 525), 40, 20)
+
+        # --== Рисование дуги drawArc() ==--
+        painter.setPen(QPen(red, 2, s=Qt.PenStyle.SolidLine))
+        painter.drawArc(350, 555, 80, 40, 2880, -2880)
+        painter.drawArc(QRect(450, 555, 80, 40, ), 2880, -2880)
+
+        # --== Рисование сегмента drawChord() ==--
+        painter.setPen(QPen(red, 2, s=Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.GlobalColor.blue, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawChord(350, 600, 80, 80, 2880, -1440)
+        painter.drawChord(QRect(400, 600, 80, 80, ), 2880, -1440)
+
+        # --== Рисование сектора drawPie() ==--
+        painter.setPen(QPen(red, 2, s=Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.GlobalColor.blue, bs=Qt.BrushStyle.DiagCrossPattern))
+        painter.drawPie(440, 600, 80, 80, 2160, -1440)
+        painter.drawPie(QRect(510, 600, 80, 80, ), 2160, -1440)
 
 
 if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
