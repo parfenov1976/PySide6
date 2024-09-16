@@ -105,7 +105,6 @@ painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
 вторым параметром значение False:
 painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, False)
 """
-from collections.abc import Sized
 
 from PySide6.QtWidgets import (QMainWindow,
                                )
@@ -123,8 +122,6 @@ from PySide6.QtCore import (Qt,
                             QRect,
                             QRectF,
                             )
-from fontTools.feaLib.ast import SizeParameters
-from matplotlib.patches import Polygon
 
 """
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
