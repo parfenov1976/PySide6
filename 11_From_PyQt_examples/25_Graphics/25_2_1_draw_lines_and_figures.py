@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
         :param parent: ссылка на родительский объект
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
-        self.setWindowTitle('Класс объекта шрифта QFont')  # установка заголовка главного окна
+        self.setWindowTitle('Рисование линий и фигур')  # установка заголовка главного окна
         self.resize(600, 700)  # установка исходного размера главного окна
 
     def paintEvent(self, event) -> None:
