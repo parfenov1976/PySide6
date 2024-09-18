@@ -2,7 +2,9 @@
 Работа с графикой. Вывод изображений.
 
 Для вывода растровых изображений предназначены методы drawPixmap() и drawImage()
-класса QPainter. Метод drawPixmap() обеспечивает вывод изображений, хранимых в объекте
+класса QPainter.
+
+Метод drawPixmap() обеспечивает вывод изображений, хранимых в объекте
 класса QPixmap. Форматы метода:
 drawPixmap(<X>, <У>, <Изображение QPixmap>)
 drawPixmap(<Координаты QPoint или QPointF>, <Изображение QPixmap>)
@@ -32,6 +34,7 @@ painter.drawPixmap(З, З, pixmap)
 QRectF. Если размеры области не совпадают с размерами фрагмента изображения, производится
 масштабирование изображения. При несоответствии пропорций изображение может
 быть искажено.
+
 Метод drawImage() предназначен для вывода изображений, хранимых в объектах класса
 QImage. Форматы метода:
 drawImage(<Координаты QPoint или QPointF>, <Изображение QImage>)
@@ -70,6 +73,7 @@ QImage в объект класса QPixmap, которое обязательн
 случаев имеет смысл использовать заданный по умолчанию элемент Aut?Color этого
 перечисления.
 """
+import os
 from PySide6.QtWidgets import (QMainWindow,
                                )
 from PySide6.QtGui import (QPainter,
@@ -86,6 +90,8 @@ from PySide6.QtCore import (Qt,
                             )
 
 """
+Импорт модуля для работы с переменными среды os
+
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
 
 Импорт из модуля PySide6.QtGui класса пера QPen, класса инструментов для рисования QPainter,
@@ -95,7 +101,46 @@ from PySide6.QtCore import (Qt,
 классов точек QPoint и QPointF, классов прямоугольников QRect и QRectF
 """
 
-# TODO дополнить примером
+
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект
+        """
+        QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        self.setWindowTitle('Вывод изображений')  # установка заголовка главного окна
+        self.resize(600, 600)  # установка исходного размера главного окна
+
+    def paintEvent(self, event) -> None:
+        """
+        Обработчик события рисования
+        :param event: событие рисования
+        :return: None
+        """
+        painter = QPainter(self)  # создание объекта рисовальщика с подключением поверхности рисования
+        black = Qt.GlobalColor.black  # создание объекта цвета из глобального перечислителя цветов
+        white = Qt.GlobalColor.white  # создание объекта цвета из глобального перечислителя цветов
+        painter.setPen(QPen(black))  # настройка пера рисовальщика
+        painter.setBrush(QBrush(white))  # настройка кисти рисовальщика
+        painter.drawRect(3, 3, 594, 594)  # рисование прямоугольника
+
+        img = QImage(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+        painter.drawImage(3, 3, img)
+        painter.drawImage(QRect(3, 200, 150, 150), img)
+        painter.drawImage(QPoint(3, 400), img, QRect(0, 0, 150, 150))
+        painter.drawImage(QRect(175, 400, 100, 100), img, QRect(0, 0, 150, 150))
+
+        pix = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+        painter.drawPixmap(300, 3, pix)
+        painter.drawPixmap(QRect(300, 200, 150, 150), pix)
+        painter.drawPixmap(QPoint(300, 400), pix, QRect(0, 0, 150, 150))
+        painter.drawPixmap(QRect(475, 400, 100, 100), pix, QRect(0, 0, 150, 150))
+
 
 if __name__ == '__main__':  # проверка условия запуска для предотвращения исполнения
     # кода верхнего уровня при импортировании данного файла как модуля
