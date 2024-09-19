@@ -8,3 +8,4 @@ tmp/
 *.log
 *.pot
 .DS_Store
+pic.dat
