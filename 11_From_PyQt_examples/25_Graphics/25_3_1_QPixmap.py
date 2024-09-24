@@ -61,7 +61,7 @@ QPixmap(<Исходный объект QPixmap>)
 ♦ depth() - возвращает глубину цвета;
 ♦ isQBitmap() - возвращает значение True, если глубина цвета равна одному биту (т. е.
   это монохромное изображение), и False - в противном случае;
-♦ createMaskFromColor(<Цвет QColor>[, mode=МaskМode.MaskInColor]>) - создает на основе
+♦ createMaskFromColor(<Цвет QColor>[, mode=MaskMode.MaskInColor]>) - создает на основе
   текущего изображения маску в виде объекта класса QBitmap и возвращает ее. Первый
   параметр задает цвет - области, закрашенные этим цветом, будут на маске либо
   прозрачными, либо непрозрачными. Необязательный параметр mode задает режим создания
@@ -78,9 +78,9 @@ QPixmap(<Исходный объект QPixmap>)
   QPixmap. Исходное изображение не изменяется. Форматы метода:
   scaled(<Ширина>, <Высота>[,
          aspectRatioMode=AspectRatioMode.IgnoreAspectRatio] [,
-         transformМode=ТransformationMode.FastTransformation])
+         transformMode=TransformationMode.FastTransformation])
   scaled (<Размеры QSize>[, aspectRatioMode=AspectRatioMode.IgnoreAspectRatio] [,
-          transformМode=TransformationМode.FastTransformation])
+          transformMode=TransformationMode.FastTransformation])
   В необязательном параметре aspectRatioMode могут быть указаны следующие элементы
   перечисления AspectRatioMode из модуля QtCore.Qt:
   • IgnoreAspectRatio - изменяет размеры без сохранения пропорций сторон;
@@ -94,25 +94,81 @@ QPixmap(<Исходный объект QPixmap>)
   • SmoothTransformation - сглаживание включено;
 ♦ scaledToWidth() - изменяет ширину изображения и возвращает результат в виде объекта
   класса QPixmap. Формат метода:
-  scaledToWidth(<Ширина>[, mode=ТransfoпnationMode.FastTransfoпnation])
+  scaledToWidth(<Ширина>[, mode=TransformationMode.FastTransformation])
   Высота изображения изменяется пропорционально. Исходное изображение не изменяется.
-  IJараметр mode аналогичен параметру transformМode в методе scaled ();
-♦ scaledToHeight () -:- изменяет высоту изображения и возвращает результат в виде объекта
-класса QPixmap. Формат метода:
-scaledToHeight (<Высота> [, mode=TransformationMode.FastTransfoпnation] )
-Ширина изображения изменяется пропорционально. Исходное изображение не изменяется.
-Параметр mode аналогичен параметру transformМode в методе scaled ();
-♦ transformed () - производит трансформацию изображения (например, поворот) и возвращает
-результат в виде объекта класса QPixmap. Формат метода:
-transformed(<Tpaнcфopмaция QTransform>[,
-mode=TransfoпnationМode.FastTransfoпnation])
-Исходное изображение не изменяется. Параметр mode аналогичен параметру
-transformМode в методе scaled ();
+  Параметр mode аналогичен параметру transformMode в методе scaled();
+♦ scaledToHeight() - изменяет высоту изображения и возвращает результат в виде объекта
+  класса QPixmap. Формат метода:
+  scaledToHeight (<Высота> [, mode=TransformationMode.FastTransformation])
+  Ширина изображения изменяется пропорционально. Исходное изображение не изменяется.
+  Параметр mode аналогичен параметру transformMode в методе scaled();
+♦ transformed() - производит трансформацию изображения (например, поворот) и возвращает
+  результат в виде объекта класса QPixmap. Формат метода:
+  transformed(<Трансформация QTransform>[, mode=TransformationMode.FastTransformation])
+  Исходное изображение не изменяется. Параметр mode аналогичен параметру
+  transformMode в методе scaled();
 ♦ swap(<Изображение QPixmap>) - заменяет текущее изображение указанным в параметре;
 ♦ hasAlpha() - возвращает True, если изображение имеет прозрачные области, и False -
-в противном случае;
+  в противном случае;
 ♦ hasAlphaChannel() - возвращает True, если формат изображения поддерживает прозрачность,
-и False - в противном случае.
+  и False - в противном случае.
+"""
+import os
+from PySide6.QtWidgets import (QMainWindow,
+                               )
+from PySide6.QtGui import (QPainter,
+                           QPixmap,
+                           )
+"""
+Импорт модуля os для работы с переменными интерпретатора 
+
+Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
+
+Импорт из модуля PySide6.QtGui класса рисовальщика QPainter,
+класса для работы с изображениям в контекстно-зависимом представлении QPixmap
 """
 
-# TODO добавить пример
+class MainWindow(QMainWindow):
+    """
+    Класс главного окна приложения от супер класса главных окон
+    """
+    def __init__(self, parent=None) -> None:
+        """
+        Конструктор главного окна приложения
+        :param parent: ссылка на родительский объект
+        """
+        QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
+        # super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
+        self.resize(300, 300)  # установка исходных размеров главного окна приложения
+        self.setWindowTitle('Класс QImage')  # установка имени главного окна приложения
+        self.pix = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+
+    def paintEvent(self, event) -> None:
+        """
+        Обработчик события рисования
+        :param event: событие рисования
+        :return: None
+        """
+        painter = QPainter(self)  # создание объекта рисовальщика с подключением поверхности рисования
+        painter.drawPixmap(0, 0, self.pix)  # вывод изображения в область рисования
+
+
+if __name__ == '__main__':  # проверка условия запуска для предотвращения
+    # запуска кода верхнего уровня при импортировании данного файла как модуля
+    from PySide6.QtWidgets import QApplication
+    import sys
+    """
+    Импорт из модуля PySide6.QtWidgets класса управления приложением QApplication
+    Импорт модуля sys, предоставляющего доступ к объекта интерпретатора, нужен для доступа
+    к аргументам командной строки. Если использование аргументов командной строки не предполагается,
+    то импорт можно не выполнять. При этом, при создании приложения в класс QtWidgets.QApplication([])
+    в качестве аргумента передается пустой список.
+    """
+    app = QApplication(sys.argv)  # создание основного цикла событий приложения
+    app.setStyle('Fusion')  # установка более красивого стиля оформления виджетов
+    window = MainWindow()  # создание экземпляра главного окна приложения
+    window.show()  # включение видимости окна, по умолчанию окно спрятано
+    sys.exit(app.exec())  # Запуск основного цикла событий приложения.
+    # Код ниже метода запуска цикла событий не будет достигнут и выполнен пока не будет выполнен
+    # выход и цикл событий не будет остановлен. Не обязательно оборачивать запуск цикла в метод выхода
+
