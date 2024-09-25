@@ -114,18 +114,20 @@ QPixmap(<Исходный объект QPixmap>)
   и False - в противном случае.
 """
 import os
+
 from PySide6.QtWidgets import (QMainWindow,
                                )
 from PySide6.QtGui import (QPainter,
                            QPixmap,
-                           )
+                           QImage)
 """
 Импорт модуля os для работы с переменными интерпретатора 
 
 Импорт из модуля PySide6.QtWidgets класса главных окон QMainWindow
 
 Импорт из модуля PySide6.QtGui класса рисовальщика QPainter,
-класса для работы с изображениям в контекстно-зависимом представлении QPixmap
+класса для работы с изображениями в контекстно-зависимом представлении QPixmap,
+класса для работы с изображениями в контекстно-независимом представлении QImage
 """
 
 class MainWindow(QMainWindow):
@@ -139,9 +141,34 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         # super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
-        self.resize(300, 300)  # установка исходных размеров главного окна приложения
+        self.resize(750, 600)  # установка исходных размеров главного окна приложения
         self.setWindowTitle('Класс QImage')  # установка имени главного окна приложения
-        self.pix = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+        self.pix_1 = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+
+       # --== Загрузка изображения из массива байтов
+        self.img = QImage()  # создание объекта файла изображения
+        f = open(os.path.join('data', 'photo.jpg'), 'rb')  # открытие файла на чтение в режиме байтов
+        self.img = f.read()  # чтение файла изображения в аттрибут
+        f.close()  # закрытие файла
+        self.pix_2 = QPixmap()  # создание объекта изображения
+        self.pix_2.loadFromData(self.img, 'jpg')  # загрузка в объект изображения байтовых данных
+
+        # --== Загрузка изображения из файла
+        self.pix_3 = QPixmap()  # создание объекта изображения
+        print(self.pix_3.load(os.path.join('data', 'photo.jpg')))  # загрузка изображения из файла
+
+        # --== Сохранение изображения в файл
+        self.pix_3.save(os.path.join('data', 'photo.png'), 'png')  # сохранение изображения в файл
+
+        # --== Преобразование объекта QImage в объект QPixmap
+        self.img = QImage(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+        self.pix_4 = QPixmap()  # создание объекта изображения
+        print(self.pix_4.convertFromImage(self.img))  # конвертация объекта изображения
+        self.pix_5 = QPixmap.fromImage(self.img)
+
+        # --== Преобразование объекта QPixmap в объект QImage
+        self.img_2 = QPixmap.toImage(self.pix_5)
+
 
     def paintEvent(self, event) -> None:
         """
@@ -150,7 +177,18 @@ class MainWindow(QMainWindow):
         :return: None
         """
         painter = QPainter(self)  # создание объекта рисовальщика с подключением поверхности рисования
-        painter.drawPixmap(0, 0, self.pix)  # вывод изображения в область рисования
+        painter.drawPixmap(0, 0, self.pix_1)  # вывод изображения в область рисования
+
+        painter.drawPixmap(250, 0, self.pix_2)  # вывод изображения в область рисования
+
+        painter.drawPixmap(500, 0, self.pix_3)  # вывод изображения в область рисования
+
+        painter.drawPixmap(0, 200, self.pix_4)  # вывод изображения в область рисования
+
+        painter.drawPixmap(250, 200, self.pix_5)  # вывод изображения в область рисования
+
+        painter.drawImage(500, 200, self.img_2)  # вывод изображения в область рисования
+
 
 
 if __name__ == '__main__':  # проверка условия запуска для предотвращения
