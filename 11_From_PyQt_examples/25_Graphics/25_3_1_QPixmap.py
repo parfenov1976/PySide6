@@ -119,7 +119,11 @@ from PySide6.QtWidgets import (QMainWindow,
                                )
 from PySide6.QtGui import (QPainter,
                            QPixmap,
-                           QImage)
+                           QImage,
+                           Qt,
+                           QColor,
+                           QTransform,
+                           )
 """
 Импорт модуля os для работы с переменными интерпретатора 
 
@@ -127,7 +131,9 @@ from PySide6.QtGui import (QPainter,
 
 Импорт из модуля PySide6.QtGui класса рисовальщика QPainter,
 класса для работы с изображениями в контекстно-зависимом представлении QPixmap,
-класса для работы с изображениями в контекстно-независимом представлении QImage
+класса для работы с изображениями в контекстно-независимом представлении QImage,
+класса перечислителя настроек виджетов Qt, класса цветов QColor,
+класса преобразований изображений QTransform
 """
 
 class MainWindow(QMainWindow):
@@ -141,7 +147,7 @@ class MainWindow(QMainWindow):
         """
         QMainWindow.__init__(self, parent)  # явный вызов конструктора родительского класса
         # super().__init__(parent)  # вызов конструктора родительского класса через функцию super()
-        self.resize(750, 600)  # установка исходных размеров главного окна приложения
+        self.resize(1000, 600)  # установка исходных размеров главного окна приложения
         self.setWindowTitle('Класс QImage')  # установка имени главного окна приложения
         self.pix_1 = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
 
@@ -169,6 +175,36 @@ class MainWindow(QMainWindow):
         # --== Преобразование объекта QPixmap в объект QImage
         self.img_2 = QPixmap.toImage(self.pix_5)
 
+        # --== Заливка изображения цветом
+        self.pix_6 = QPixmap(os.path.join('data', 'photo.jpg'))  # создание объекта изображения из файла
+        self.pix_6.fill(fillColor='blue')  # заливка изображения цветом (цвет может быть задан очень по разному)
+
+        # --== Извлечение данные об изображении
+        print(f'Ширина изображения: {self.pix_6.width()}')
+        print(f'Высота изображения: {self.pix_6.height()}')
+        print(f'Размеры прямоугольника, описывающего изображение: {self.pix_6.rect().width()} x {self.pix_6.rect().height()}')
+        print(f'Глубина цвета изображения: {self.pix_6.depth()} бит')
+        print(f'Изображение монохромное: {self.pix_6.isQBitmap()}')
+        print(f'Изображение имеет прозрачные области: {self.pix_6.hasAlpha()}')
+        print(f'Изображение поддерживает прозрачность: {self.pix_6.hasAlphaChannel()}')
+
+        # --== Маска изображения
+        self.mask = self.pix_5.createMaskFromColor(QColor('white'), mode=Qt.MaskMode.MaskOutColor)
+        print(self.mask)
+
+        # --== Копирование части изображения
+        self.pix_7 = self.pix_5.copy(50, 50, 75, 75)
+
+        # --== Изменение масштаба изображения
+        self.pix_8 = self.pix_5.scaled(100, 150, aspectMode=Qt.AspectRatioMode.IgnoreAspectRatio)
+        self.pix_9 = self.pix_5.scaledToWidth(100, mode=Qt.TransformationMode.SmoothTransformation)
+        self.pix_10 = self.pix_5.scaledToHeight(100, mode=Qt.TransformationMode.SmoothTransformation)
+
+        # --== Трансформация изображения
+        rotation = QTransform()  # создание объекта трансформации
+        rotation.rotate(45.0)  # указание поворота в качестве трансформации
+        self.pix_11 = self.pix_5.transformed(rotation)  #  применение трансформации к изображению
+
 
     def paintEvent(self, event) -> None:
         """
@@ -178,17 +214,18 @@ class MainWindow(QMainWindow):
         """
         painter = QPainter(self)  # создание объекта рисовальщика с подключением поверхности рисования
         painter.drawPixmap(0, 0, self.pix_1)  # вывод изображения в область рисования
-
         painter.drawPixmap(250, 0, self.pix_2)  # вывод изображения в область рисования
-
         painter.drawPixmap(500, 0, self.pix_3)  # вывод изображения в область рисования
-
         painter.drawPixmap(0, 200, self.pix_4)  # вывод изображения в область рисования
-
         painter.drawPixmap(250, 200, self.pix_5)  # вывод изображения в область рисования
-
         painter.drawImage(500, 200, self.img_2)  # вывод изображения в область рисования
-
+        painter.drawPixmap(0, 400, self.pix_6)  # вывод изображения в область рисования
+        painter.drawPixmap(250, 400, self.mask)  # вывод изображения в область рисования
+        painter.drawPixmap(500, 400, self.pix_7)  # вывод изображения в область рисования
+        painter.drawPixmap(600, 400, self.pix_8)  # вывод изображения в область рисования
+        painter.drawPixmap(550, 500, self.pix_9)  # вывод изображения в область рисования
+        painter.drawPixmap(650, 500, self.pix_10)  # вывод изображения в область рисования
+        painter.drawPixmap(750, 0, self.pix_11)  # вывод изображения в область рисования
 
 
 if __name__ == '__main__':  # проверка условия запуска для предотвращения
